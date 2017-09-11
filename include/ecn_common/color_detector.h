@@ -14,9 +14,9 @@ struct CamParam
         u0(_u0), v0(_v0), ipx(1./_px), ipy(1./_py) {}
 
     // init from resolution and view angle
-    CamParam(int width, int height, double degreeAngle)
+    CamParam(int width, int height, double field_of_view)
     {
-        const double t = tan(degreeAngle*M_PI/180);
+        const double t = tan(field_of_view*M_PI/90);
         u0 = width/2.;
         v0 = height/2.;
         ipx = t/u0;
@@ -57,9 +57,9 @@ public:
     {
         cam_ = CamParam(px, py, u0, v0);
     }
-    void setCamera(int width, int height, double degreeAngle)
+    void setCamera(int width, int height, double field_of_view)
     {
-        cam_ = CamParam(width, height, degreeAngle);
+        cam_ = CamParam(width, height, field_of_view);
     }
 
     // processing functions
