@@ -16,11 +16,11 @@ struct CamParam
     // init from resolution and view angle
     CamParam(int width, int height, double degreeAngle)
     {
-        double it = 1./tan(degreeAngle*M_PI/180);
+        const double t = tan(degreeAngle*M_PI/180);
         u0 = width/2.;
         v0 = height/2.;
-        ipx = u0*it;
-        ipy = v0*it;
+        ipx = t/u0;
+        ipy = t/v0;
     }
 
     double ipx, ipy, u0, v0;
@@ -68,9 +68,9 @@ public:
     void process(const cv::Mat &_im);
 
     // get resulting info
-    inline double x() {return x_;}
-    inline double y() {return y_;}
-    inline double area() {return area_;}
+    inline double x() {return (x_-cam_.u0)*cam_.ipx;}
+    inline double y() {return (y_-cam_.v0)*cam_.ipy;}
+    inline double area() {return area_*cam_.ipx*cam_.ipy;}
 
 protected:    
     double x_=0, y_=0, area_=0;
