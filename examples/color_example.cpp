@@ -39,7 +39,7 @@ int main(int argc, char** argv)
     ColorDetector cd(r, g, b);
     cd.showSegmentation();  // also gives trackbars for saturation / value
     cd.showOutput();
-    //cd.fitCircle();
+    cd.fitCircle();
 
     ros::Rate loop(10);
 
