@@ -13,11 +13,13 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
 )
 
+find_package(VISP REQUIRED)
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ecn_common
   CATKIN_DEPENDS cv_bridge roscpp image_transport
-#  DEPENDS system_lib
+  DEPENDS ${VISP_LIBRARIES}
 )
 
 ## Specify additional locations of header files
@@ -25,14 +27,17 @@ catkin_package(
 include_directories(
  include
   ${catkin_INCLUDE_DIRS}
+  ${VISP_INCLUDE_DIRS}
 )
 
 ## Main C++ library
 add_library(${PROJECT_NAME}
                 include/ecn_common/token.h
+                include/ecn_common/optim.h
+                src/optim.cpp
                 include/ecn_common/color_detector.h
                 src/color_detector.cpp )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${VISP_LIBRARIES})
 
 ## Test executables
 add_executable(token_example examples/token_example.cpp)
@@ -41,3 +46,6 @@ target_link_libraries(token_example ${PROJECT_NAME})
 add_executable(color_example examples/color_example.cpp)
 target_link_libraries(color_example ${PROJECT_NAME})
 
+
+add_executable(qp_example examples/qp_example.cpp)
+target_link_libraries(qp_example ${PROJECT_NAME})

@@ -142,8 +142,11 @@ void ColorDetector::process(const cv::Mat &_im)
 void ColorDetector::process(const cv::Mat &_im, cv::Mat &_im_processed, bool write_output)
 {
     auto contour = findMainContour(_im);
+
     if(!contour.size())
     {
+        if(show_output_ || write_output)
+            _im.copyTo(_im_processed);
         return;
     }
 

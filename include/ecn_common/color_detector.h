@@ -29,14 +29,14 @@ struct CamParam
 class ColorDetector
 {
 public:
-    ColorDetector(): cam_(640,480,30)
+    ColorDetector(): cam_(640,480,60)
     {
         // default values
         setContourDisplay(255,255,255);
         setSaturationValue(130,95);
     }
 
-    ColorDetector(int r, int g, int b) : cam_(640,480,30)
+    ColorDetector(int r, int g, int b) : cam_(640,480,60)
     {
         setContourDisplay(255,255,255);
         setSaturationValue(130,95);
@@ -61,6 +61,8 @@ public:
     {
         cam_ = CamParam(width, height, field_of_view);
     }
+    inline double xLim() {return cam_.u0*cam_.ipx;}
+    inline double yLim() {return cam_.v0*cam_.ipy;}
 
     // processing functions
     std::vector<cv::Point> findMainContour(const cv::Mat &_im);
