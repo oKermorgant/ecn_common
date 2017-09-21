@@ -17,7 +17,7 @@ find_package(VISP REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES ecn_common
+  LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS cv_bridge roscpp image_transport
   DEPENDS ${VISP_LIBRARIES}
 )
@@ -45,7 +45,6 @@ target_link_libraries(token_example ${PROJECT_NAME})
 
 add_executable(color_example examples/color_example.cpp)
 target_link_libraries(color_example ${PROJECT_NAME})
-
 
 add_executable(qp_example examples/qp_example.cpp)
 target_link_libraries(qp_example ${PROJECT_NAME})

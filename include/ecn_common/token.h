@@ -12,7 +12,7 @@ class TokenManager
 {
 public:
 
-    TokenManager(std::string group_name)
+    TokenManager(std::string group_name, bool _wait = false)
     {
 
         msg_.data = group_name;
@@ -20,9 +20,15 @@ public:
         pub_ = nh_.advertise<std_msgs::String>("/token_manager/requested", 1);
         sub_ = nh_.subscribe("/token_manager/current", 100, &TokenManager::tokenCallBack, this);
 
+        if(_wait)
+            wait();
+    }
+
+    void wait()
+    {
         // wait for token
         ros::Rate loop(1);
-        while(ros::ok() && current_token_ != group_name)
+        while(ros::ok() && current_token_ != msg_.data)
         {
             updateToken();
             if(current_token_ != "")
