@@ -66,8 +66,8 @@ public:
 
     // processing functions
     std::vector<cv::Point> findMainContour(const cv::Mat &_im);
-    void process(const cv::Mat &_im, cv::Mat &_im_processed, bool write_output = true);
-    void process(const cv::Mat &_im);
+    bool process(const cv::Mat &_im, cv::Mat &_im_processed, bool write_output = true);
+    bool process(const cv::Mat &_im);
 
     // get resulting info
     inline double x() {return (x_-cam_.u0)*cam_.ipx;}

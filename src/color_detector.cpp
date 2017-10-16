@@ -132,14 +132,14 @@ std::vector<cv::Point> ColorDetector::findMainContour(const cv::Mat &_im)
 }
 
 
-void ColorDetector::process(const cv::Mat &_im)
+bool ColorDetector::process(const cv::Mat &_im)
 {
     cv::Mat im_proc;
-    process(_im, im_proc, false);
+    return process(_im, im_proc, false);
 }
 
 
-void ColorDetector::process(const cv::Mat &_im, cv::Mat &_im_processed, bool write_output)
+bool ColorDetector::process(const cv::Mat &_im, cv::Mat &_im_processed, bool write_output)
 {
     auto contour = findMainContour(_im);
 
@@ -147,7 +147,7 @@ void ColorDetector::process(const cv::Mat &_im, cv::Mat &_im_processed, bool wri
     {
         if(show_output_ || write_output)
             _im.copyTo(_im_processed);
-        return;
+        return false;
     }
 
     if(fit_circle_)
@@ -189,5 +189,6 @@ void ColorDetector::process(const cv::Mat &_im, cv::Mat &_im_processed, bool wri
         cv::imshow("Color detector output",_im_processed);
         cv::waitKey(1);
     }
+    return true;
 }
 }

@@ -3,6 +3,7 @@ project(ecn_common)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
+set(CMAKE_BUILD_TYPE Debug)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -11,6 +12,9 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   roscpp
   image_transport
+  std_msgs
+  sensor_msgs
+  geometry_msgs
 )
 
 find_package(VISP REQUIRED)
@@ -18,7 +22,7 @@ find_package(VISP REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS cv_bridge roscpp image_transport
+  CATKIN_DEPENDS cv_bridge roscpp image_transport std_msgs sensor_msgs geometry_msgs
   DEPENDS ${VISP_LIBRARIES}
 )
 
@@ -48,3 +52,23 @@ target_link_libraries(color_example ${PROJECT_NAME})
 
 add_executable(qp_example examples/qp_example.cpp)
 target_link_libraries(qp_example ${PROJECT_NAME})
+
+
+
+
+#############
+## Install ##
+#############
+
+ # only install actual library
+ install(TARGETS ${PROJECT_NAME}
+   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+ )
+
+  install(DIRECTORY include/${PROJECT_NAME}/
+    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+    FILES_MATCHING PATTERN "*.h"
+    PATTERN ".svn" EXCLUDE
+  )
