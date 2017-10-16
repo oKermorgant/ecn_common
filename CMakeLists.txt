@@ -60,6 +60,10 @@ target_link_libraries(qp_example ${PROJECT_NAME})
 ## Install ##
 #############
 
+
+catkin_install_python(PROGRAMS src/token_manager
+                      DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
  # only install actual library
  install(TARGETS ${PROJECT_NAME}
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
