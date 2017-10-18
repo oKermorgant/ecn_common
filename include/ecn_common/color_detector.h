@@ -34,6 +34,8 @@ public:
         // default values
         setContourDisplay(255,255,255);
         setSaturationValue(130,95);
+
+
     }
 
     ColorDetector(int r, int g, int b) : cam_(640,480,60)
@@ -56,6 +58,9 @@ public:
     void setCamera(double px, double py, double u0, double v0)
     {
         cam_ = CamParam(px, py, u0, v0);
+        // default values for x,y
+        x_ = cam_.u0/2;
+        y_ = cam_.v0/2;
     }
     void setCamera(int width, int height, double field_of_view)
     {
