@@ -9,6 +9,7 @@ namespace ecn
 
 struct CamParam
 {
+    CamParam() {}
     // init from classical parameters
     CamParam(double _px, double _py, double _u0, double _v0):
         u0(_u0), v0(_v0), ipx(1./_px), ipy(1./_py) {}
@@ -29,17 +30,18 @@ struct CamParam
 class ColorDetector
 {
 public:
-    ColorDetector(): cam_(640,480,60)
+    ColorDetector()
     {
         // default values
         setContourDisplay(255,255,255);
         setSaturationValue(130,95);
 
-
+        setCamera(640,480,60);
     }
 
-    ColorDetector(int r, int g, int b) : cam_(640,480,60)
+    ColorDetector(int r, int g, int b)
     {
+        setCamera(640,480,60);
         setContourDisplay(255,255,255);
         setSaturationValue(130,95);
         detectColor(r, g, b);
