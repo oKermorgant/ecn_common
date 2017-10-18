@@ -1,4 +1,5 @@
 #include <ecn_common/optim.h>
+#include <vector>
 
 namespace ecn
 {
