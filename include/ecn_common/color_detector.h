@@ -2,6 +2,7 @@
 #define COLORDETECTOR_H
 
 #include <opencv2/core/core.hpp>
+#include <opencv2/highgui.hpp>
 
 namespace ecn
 {
@@ -48,7 +49,15 @@ public:
     }
 
     // tuning
-    void setSaturationValue(int sat, int value) {sat_ = sat; val_ = value;}
+    void setSaturationValue(int sat, int value)
+    {
+        if(show_segment_)
+        {
+             cv::setTrackbarPos("Saturation", "Color detector - range", sat);
+             cv::setTrackbarPos("Value", "Color detector - range", value);
+        }
+        sat_ = sat; val_ = value;
+    }
     void detectColor(int r, int g, int b);
     void showSegmentation();
     inline void showOutput() {show_output_ = true;}
