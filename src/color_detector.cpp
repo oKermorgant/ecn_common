@@ -155,6 +155,8 @@ bool ColorDetector::process(const cv::Mat &_im, cv::Mat &_im_processed, bool wri
         cv::Point2f pt;float radius;
         cv::minEnclosingCircle(contour, pt, radius);
 
+        std::cout << "Found radius: " << radius << std::endl;
+
         // filter output
         x_ = .5*(x_ + pt.x);
         y_ = .5*(y_ + pt.y);
