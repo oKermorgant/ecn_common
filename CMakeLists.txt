@@ -53,6 +53,9 @@ target_link_libraries(color_example ${PROJECT_NAME})
 add_executable(qp_example examples/qp_example.cpp)
 target_link_libraries(qp_example ${PROJECT_NAME})
 
+add_executable(hist examples/test_hist.cpp)
+target_link_libraries(hist ${PROJECT_NAME})
+
 
 
 

@@ -29,7 +29,7 @@ int main(int argc, char** argv)
     image_transport::Subscriber imsub = it.subscribe("/image", 1, &readImage);
 
     // init color detector
-    int r = 255, g = 255, b = 0;
+    int r = 255, g = 0, b = 0;
     if(argc == 4)
     {
         r = atoi(argv[1]);
