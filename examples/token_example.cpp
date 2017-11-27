@@ -1,9 +1,8 @@
-#include <ecn_common/token.h>
+#include <ecn_common/token_handle.h>
 #include <sstream>
 #include <time.h>
 
 using namespace std;
-using namespace ecn;
 
 int main(int argc, char** argv)
 {
@@ -15,9 +14,8 @@ int main(int argc, char** argv)
     string group_name = "group_" + ss.str();
 
     ros::init(argc, argv, node_name.c_str());
-    ros::NodeHandle nh;
 
-    TokenManager tm(group_name);
+    ecn::TokenHandle token(group_name);
 
     ros::Rate loop(1);
 
@@ -25,8 +23,7 @@ int main(int argc, char** argv)
     {
         cout << group_name << " doing its job" << endl;
 
-        tm.updateToken();
-
+        token.update();
 
         loop.sleep();
         ros::spinOnce();
