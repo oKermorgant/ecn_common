@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 
     while(ros::ok())
     {
-        cout << group_name << " doing its job" << endl;
+        cout << group_name << " doing its C++ job" << endl;
 
         token.update();
 

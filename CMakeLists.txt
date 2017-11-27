@@ -6,8 +6,6 @@ add_compile_options(-std=c++11)
 set(CMAKE_BUILD_TYPE Release)
 
 ## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   roscpp
@@ -16,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   geometry_msgs
   message_generation
+  rospy
 )
 
 find_package(VISP REQUIRED)
@@ -33,7 +32,8 @@ generate_messages()
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS cv_bridge roscpp image_transport std_msgs sensor_msgs geometry_msgs
+  CATKIN_DEPENDS rospy cv_bridge roscpp image_transport std_msgs
+                    sensor_msgs geometry_msgs
   DEPENDS ${VISP_LIBRARIES}
 )
 
@@ -55,9 +55,9 @@ add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${VISP_LIBRARIES})
 
 ## Test executables
-add_executable(token_example examples/token_example.cpp)
-target_link_libraries(token_example ${PROJECT_NAME})
-add_dependencies(token_example ecn_common_gencpp)
+add_executable(token_cpp_example examples/token_cpp_example.cpp)
+target_link_libraries(token_cpp_example ${PROJECT_NAME})
+add_dependencies(token_cpp_example ecn_common_gencpp)
 
 add_executable(color_example examples/color_example.cpp)
 target_link_libraries(color_example ${PROJECT_NAME})
@@ -73,7 +73,7 @@ target_link_libraries(hist ${PROJECT_NAME})
 ## Install ##
 #############
 
-catkin_install_python(PROGRAMS src/token_manager
+catkin_install_python(PROGRAMS scripts/token_manager
                       DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
  # only install actual library

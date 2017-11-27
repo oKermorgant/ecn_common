@@ -1,13 +1,11 @@
-#!/usr/bin/python
+#! /usr/bin/env python
 
 import rospy
-from beacons.srv import Score
 from ecn_common.srv import Token, TokenResponse
-
 
 class TokenManager:
     def __init__(self):        
-        self.pub = rospy.Service('manager', Token, self.tokenCB)
+        self.pub = rospy.Service('/token_manager/manager', Token, self.tokenCB)
         self.res = TokenResponse()
         self.t0 = 0
            
@@ -22,11 +20,15 @@ class TokenManager:
             self.res.available = (t - self.t0 > 1)
             if self.res.available:
                 self.res.current = req.id
+                print(self.res.current + ' just got the token')
+            else:
+                print(req.id + ' asking for token')
         else:
             # called from update()
             if self.res.current == req.id:
                 self.t0 = t
                 self.res.available = False
+                print(self.res.current + ' still on Baxter')
             else:
                 print(req.id + ' called update before wait')
         return self.res
