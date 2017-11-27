@@ -73,11 +73,11 @@ target_link_libraries(hist ${PROJECT_NAME})
 ## Install ##
 #############
 
-catkin_install_python(PROGRAMS scripts/token_manager
+catkin_install_python(PROGRAMS scripts/token_manager examples/token_python_example
                       DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
  # only install actual library
- install(TARGETS ${PROJECT_NAME}
+ install(TARGETS ${PROJECT_NAME} token_cpp_example 
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
