@@ -3,6 +3,8 @@
 import rospy
 from ecn_common.msg import TokenCurrent, TokenRequest
 
+debug = False
+
 class TokenManager:
     def __init__(self):  
         # init publisher
@@ -91,7 +93,8 @@ class TokenManager:
         else:
             msg += 'already used'
 
-        print(msg)
+        if debug or (not debug and 'used' not in msg):
+            print(msg)
         # publish current tokens
         self.pub.publish(self.current)
 

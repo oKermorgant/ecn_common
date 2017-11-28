@@ -54,7 +54,7 @@ public:
         if(req_.arm == 2)
             current_ = msg->right;
         else
-            current_  =msg->left;
+            current_  = msg->left;
     }
 
     void update()

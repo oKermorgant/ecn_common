@@ -1,40 +1,50 @@
 #! /usr/bin/env python
 
 import rospy
-from ecn_common.srv import Token, TokenResponse, TokenRequest
+from ecn_common.msg import TokenCurrent, TokenRequest
 
 class TokenHandle:
-    def __init__(self, name, wait = True):
-        self.request = TokenRequest()
-        self.request.id = name
-        self.request.init = True
-        self.response = TokenResponse()
-        self.response.available = False
+    def __init__(self, group, side = ''):
         
-        self.client = rospy.ServiceProxy('/token_manager/manager', Token)
+        # init request and publisher
+        self.req = TokenRequest()
+        self.req.group = group
+        if side == '':
+            self.req.arm = 0
+        elif side == 'left':
+            self.req.arm = 1
+        else:
+            self.req.arm = 2
+        self.pub = rospy.Publisher('/token_manager/request', TokenRequest, queue_size=1)
         
-        if wait:
-            self.wait()            
-            
-    def wait(self):
-        try:
-            self.client.wait_for_service(5)                
-        except:
-            print("Token manager not running, skipping")
-            self.response.available = True
-            
-        while not rospy.is_shutdown() and not self.response.available:
+        
+        # init subscriber and wait
+        self.sub = rospy.Subscriber('token_manager/current', TokenCurrent, self.currentCB)
+        self.current = ""
+        self.t = rospy.Time.now().to_sec()
+        t0 = rospy.Time.now().to_sec()
+
+        while not rospy.is_shutdown() and self.current != self.req.group:
             self.update()
-            if not self.response.available:
-                print("Current token is for group " + self.response.current)
-                if self.response.current == self.request.id:
-                    print("Current token has the same ID as yours")
-                    
+            
+            if self.current != self.req.group and self.current != '':
+                print("Current token is for group " + self.current)
+            if self.current == '' and self.t - t0 > 5:
+                break
+
             rospy.sleep(1)
-            
+
+        # now we have the hand - no need to continue subcribing
         if not rospy.is_shutdown():
-            self.request.init = False
-            
+            self.sub.unregister()
+        
+    def currentCB(self, msg):
+        self.t = rospy.Time.now().to_sec()
+        if self.req.arm == 2:
+            self.current = msg.right
+        else:
+            self.current = msg.left
+                                
             
     def update(self):
-        self.response = self.client.call(self.request)                
+        self.pub.publish(self.req)

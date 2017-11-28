@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
     <node name="req1" pkg="ecn_common" type="token_cpp_example" args="0 10" output="screen"/>
-    <node name="req2" pkg="ecn_common" type="token_cpp_example" args="2 20" output="screen"/>
+    <node name="req2" pkg="ecn_common" type="token_python_example" args="2 20" output="screen"/>
     <node name="req3" pkg="ecn_common" type="token_cpp_example" args="4 100" output="screen"/>
-    <node name="req4" pkg="ecn_common" type="token_cpp_example" args="5 20" output="screen"/>
+    <node name="req4" pkg="ecn_common" type="token_python_example" args="5 20" output="screen"/>
     <node name="req5" pkg="ecn_common" type="token_cpp_example" args="8 15" output="screen"/>
 </launch>
