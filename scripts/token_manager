@@ -8,11 +8,14 @@ class TokenManager:
         self.pub = rospy.Service('/token_manager/manager', Token, self.tokenCB)
         self.res = TokenResponse()
         self.t0 = 0
-           
+        self.in_cb = False   
     def update(self):
         self.pub.publish(self.current)
         
     def tokenCB(self, req):
+        if self.in_cb:
+            return self.res
+        self.in_cb = True
                 
         t = rospy.Time.now().to_sec()
         
@@ -31,6 +34,7 @@ class TokenManager:
                 print(self.res.current + ' still on Baxter')
             else:
                 print(req.id + ' called update before wait')
+        self.in_cb = False
         return self.res
             
 if __name__ == '__main__':
