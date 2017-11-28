@@ -2,15 +2,27 @@
 from ecn_common.token_handle import TokenHandle
 from pylab import rand
 import rospy
+import sys
 
+
+kill = -1
+if len(sys.argv) == 5:
+    sleep(int(sys.argv[1]))
+    kill = int(sys.argv[2])
+    
 group_name = str(int(1000*rand()))
 
 rospy.init_node('node_' + group_name)
 
 token = TokenHandle(group_name)
 
+t0 = rospy.Time.now().to_sec()
+
 while not rospy.is_shutdown():
     print(group_name + " doing its Python job")
+    
+    if kill != -1 and rospy.Time.now().to_sec() - t0 > kill:
+        break
     
     token.update();
     rospy.sleep(1)

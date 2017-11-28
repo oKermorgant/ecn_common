@@ -60,34 +60,34 @@ class TokenManager:
         if req.arm == 0 and self.current.left in ok and self.current.right in ok:
             self.current.left = req.group
             self.current.right = req.group
-            msg += 'ok'
+            msg += 'ok\n'
         elif req.arm == 1 and self.current.left in ok:
             self.current.left = req.group
-            msg += 'ok'
+            msg += 'ok\n'
         elif req.arm == 2 and self.current.right in ok:
             self.current.right = req.group
-            msg += 'ok'
+            msg += 'ok\n'
         elif t0 == 0:
             # current owner has not updated for 2 sec -> pass to oldest request            
             if req.arm == 0:
                 self.current.left = min(self.left, key=lambda x: self.left[x][0])
                 self.current.right = min(self.right, key=lambda x: self.right[x][0])
                 if self.current.left == req.group and self.current.right == req.group:
-                    msg += 'ok'
+                    msg += 'ok\n'
                 else:
-                    msg += 'passed to ' + self.current.left
+                    msg += 'passed to ' + self.current.left + '\n'
             elif req.arm == 1:
                 self.current.left = min(self.left, key=lambda x: self.left[x][0])
                 if self.current.left == req.group:
-                    msg += 'ok'
+                    msg += 'ok\n'
                 else:
-                    msg += 'passed to ' + self.current.left
+                    msg += 'passed to ' + self.current.left + '\n'
             elif req.arm == 2:
                 self.current.right = min(self.right, key=lambda x: self.right[x][0])
                 if self.current.right == req.group:
-                    msg += 'ok'
+                    msg += 'ok\n'
                 else:
-                    msg += 'passed to ' + self.current.right 
+                    msg += 'passed to ' + self.current.right + '\n' 
         else:
             msg += 'already used'
 

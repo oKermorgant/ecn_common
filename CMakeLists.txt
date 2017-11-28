@@ -89,3 +89,7 @@ catkin_install_python(PROGRAMS scripts/token_manager examples/token_python_examp
     FILES_MATCHING PATTERN "*.h"
     PATTERN ".svn" EXCLUDE
   )
+
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+  PATTERN ".svn" EXCLUDE)
