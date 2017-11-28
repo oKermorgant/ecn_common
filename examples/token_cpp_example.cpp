@@ -11,7 +11,7 @@ int main(int argc, char** argv)
     srand (time(NULL));
     ss << rand() % 255;
     string node_name = "node_" + ss.str();
-    string group_name = "group_" + ss.str();
+    string group_name = ss.str();
 
     ros::init(argc, argv, node_name.c_str());
 

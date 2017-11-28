@@ -1,47 +1,107 @@
 #! /usr/bin/env python
 
 import rospy
-from ecn_common.srv import Token, TokenResponse
+from ecn_common.msg import TokenCurrent, TokenRequest
 
 class TokenManager:
-    def __init__(self):        
-        self.pub = rospy.Service('/token_manager/manager', Token, self.tokenCB)
-        self.res = TokenResponse()
-        self.t0 = 0
-        self.in_cb = False   
-    def update(self):
-        self.pub.publish(self.current)
+    def __init__(self):  
+        # init publisher
+        self.current = TokenCurrent()
+        self.current.left = ''
+        self.current.right = ''
+        self.arm = 'both arm'
+        self.pub = rospy.Publisher('/token_manager/current', TokenCurrent, queue_size=1)
         
-    def tokenCB(self, req):
-        if self.in_cb:
-            return self.res
-        self.in_cb = True
+        self.sub = rospy.Subscriber('token_manager/request', TokenRequest, self.requestCB)
+        self.left = {}
+        self.right = {}
                 
+    def update(self, group, d, t, current):
+        
+        # remove groups that have not checked for a while
+        keys = d.keys()
+        for key in keys:
+            if t - d[key][1] > 2:
+                d.pop(key)
+                
+        # update this group
+        if group in d:
+            d[group][1] = t
+        else:
+            d[group] = [t,t]
+            
+        # check time of current owner
+        if current in d:
+            return d[current][1]
+        return 0
+        
+    def requestCB(self, req):
+        
+        msg = req.group + ' asking for '
+        
+        # get time
         t = rospy.Time.now().to_sec()
         
-        if req.init:    # first-time request
-            self.res.available = (t - self.t0 > 1)
-            if self.res.available:
-                self.res.current = req.id
-                print(self.res.current + ' just got the token')
-            else:
-                print(req.id + ' asking for token')
+        # update requests and get latest request from current
+        if req.arm == 0:
+            msg += 'both arms -> '
+            t0 = self.update(req.group, self.left, t, self.current.left)
+            t0 = max(t0, self.update(req.group, self.right, t, self.current.right))
+        elif req.arm == 1:
+            t0 = self.update(req.group, self.left, t, self.current.left)
+            msg += 'left arm -> '
         else:
-            # called from update()
-            if self.res.current == req.id:
-                self.t0 = t
-                self.res.available = False
-                print(self.res.current + ' still on Baxter')
-            else:
-                print(req.id + ' called update before wait')
-        self.in_cb = False
-        return self.res
+            t0 = self.update(req.group, self.right, t, self.current.right)
+            msg += 'right arm -> '
+
+        ok = ('', req.group)
+            
+        # check automatic token (void or already has it)
+        if req.arm == 0 and self.current.left in ok and self.current.right in ok:
+            self.current.left = req.group
+            self.current.right = req.group
+            msg += 'ok'
+        elif req.arm == 1 and self.current.left in ok:
+            self.current.left = req.group
+            msg += 'ok'
+        elif req.arm == 2 and self.current.right in ok:
+            self.current.right = req.group
+            msg += 'ok'
+        elif t0 == 0:
+            # current owner has not updated for 2 sec -> pass to oldest request            
+            if req.arm == 0:
+                self.current.left = min(self.left, key=lambda x: self.left[x][0])
+                self.current.right = min(self.right, key=lambda x: self.right[x][0])
+                if self.current.left == req.group and self.current.right == req.group:
+                    msg += 'ok'
+                else:
+                    msg += 'passed to ' + self.current.left
+            elif req.arm == 1:
+                self.current.left = min(self.left, key=lambda x: self.left[x][0])
+                if self.current.left == req.group:
+                    msg += 'ok'
+                else:
+                    msg += 'passed to ' + self.current.left
+            elif req.arm == 2:
+                self.current.right = min(self.right, key=lambda x: self.right[x][0])
+                if self.current.right == req.group:
+                    msg += 'ok'
+                else:
+                    msg += 'passed to ' + self.current.right 
+        else:
+            msg += 'already used'
+
+        print(msg)
+        # publish current tokens
+        self.pub.publish(self.current)
+
             
 if __name__ == '__main__':
     '''
     Begin of main code
     '''                    
     rospy.init_node('token_manager')
+    
     
     tm = TokenManager()
         

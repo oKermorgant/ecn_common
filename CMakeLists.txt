@@ -22,9 +22,10 @@ find_package(VISP REQUIRED)
 # Python libs
 catkin_python_setup()
 
-add_service_files(
+add_message_files(
    FILES
-   Token.srv
+   TokenCurrent.msg
+   TokenRequest.msg
  )
  
 generate_messages()

@@ -1,7 +1,0 @@
-# ask or update a token, returns whether the robot is available
-string id
-bool init
-bool lefty
----
-string current
-bool available

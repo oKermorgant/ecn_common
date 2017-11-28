@@ -2,7 +2,8 @@
 #define ECN_TOKEN_H
 
 #include <ros/ros.h>
-#include <ecn_common/Token.h>
+#include <ecn_common/TokenCurrent.h>
+#include <ecn_common/TokenRequest.h>
 
 namespace ecn
 {
@@ -10,60 +11,65 @@ class TokenHandle
 {
 public:
 
-    TokenHandle(std::string group_name, bool _wait = true)
+    TokenHandle(std::string group_name, std::string side = "")
     {
-        // init message
-        srv_.request.id = group_name;
-        srv_.request.init = true;
-        srv_.response.available = false;
+        // init message & publisher
+        req_.group = group_name;
+        if(side == "")
+            req_.arm = 0;
+        else if(side == "left")
+            req_.arm = 1;
+        else
+            req_.arm = 2;
+        pub_ = nh_.advertise<ecn_common::TokenRequest>("/token_manager/request", 1);
 
-        client_ = nh_.serviceClient<ecn_common::Token>("/token_manager/manager");
+        // init subscriber
+        sub_ = nh_.subscribe("/token_manager/current", 1, &TokenHandle::callback, this);
+        current_ = "";
+        double t0;
+        t_ = t0 = ros::Time::now().toSec();
 
-        if(_wait)
-            wait();
-    }
-
-    void wait()
-    {
-        // check server actually runs
-        if(!client_.waitForExistence(ros::Duration(5)))
-        {
-            srv_.response.available = true;
-            ROS_INFO("Token manager not running, skipping");
-        }
-
-        // wait for token
+        // wait for token manager
         ros::Rate loop(1);
-        while(ros::ok() && !srv_.response.available)
+        while(ros::ok() && current_ != req_.group)
         {
             update();
-            if(!srv_.response.available)
-            {
-                ROS_INFO("Current token is for group %s", srv_.response.current.c_str());
-                if(srv_.request.id == srv_.response.current)
-
-                    ROS_INFO("Current token has the same ID as yours");
-            }
+            if(current_ != req_.group && current_ != "")
+                ROS_INFO("Current token is for group %s", current_.c_str());
+            if(current_ == "" && t_ - t0 > 5)
+                break;
 
             loop.sleep();
             ros::spinOnce();
         }
 
-        // now we have the hand
+        // now we have the hand - no need to continue subcribing
         if(ros::ok())
-            srv_.request.init = false;
+            sub_.shutdown();
+    }
+
+    void callback(const ecn_common::TokenCurrentConstPtr & msg)
+    {
+        t_ = ros::Time::now().toSec();
+        if(req_.arm == 2)
+            current_ = msg->right;
+        else
+            current_  =msg->left;
     }
 
     void update()
     {
-        client_.call(srv_);
+        pub_.publish(req_);
     }
 
 
 protected:
     ros::NodeHandle nh_;
-    ros::ServiceClient client_;
-    ecn_common::Token srv_;
+    ros::Publisher pub_;
+    ros::Subscriber sub_;
+    ecn_common::TokenRequest req_;
+    std::string current_;
+    double t_;
 
 };
 

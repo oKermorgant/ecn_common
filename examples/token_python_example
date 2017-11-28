@@ -3,11 +3,10 @@ from ecn_common.token_handle import TokenHandle
 from pylab import rand
 import rospy
 
-ss = str(int(1000*rand()))
+group_name = str(int(1000*rand()))
 
-rospy.init_node('node_' + ss)
+rospy.init_node('node_' + group_name)
 
-group_name = 'group_' + ss
 token = TokenHandle(group_name)
 
 while not rospy.is_shutdown():
