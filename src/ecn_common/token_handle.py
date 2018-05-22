@@ -11,16 +11,18 @@ class TokenHandle:
         self.req.group = group
         if side == '':
             self.req.arm = 0
+            side = 'both arms'
         elif side == 'left':
             self.req.arm = 1
+            side = 'left arm'
         else:
             self.req.arm = 2
+            side = 'right arm'
         self.pub = rospy.Publisher('/token_manager/request', TokenRequest, queue_size=1)
-        
         
         # init subscriber and wait
         self.sub = rospy.Subscriber('token_manager/current', TokenCurrent, self.currentCB)
-        self.current = ""
+        self.current = ''
         self.t = rospy.Time.now().to_sec()
         t0 = rospy.Time.now().to_sec()
 
@@ -28,7 +30,7 @@ class TokenHandle:
             self.update()
             
             if self.current != self.req.group and self.current != '':
-                print("Current token is for group " + self.current)
+                print("Group {} ({}): current token is for group {}".format(self.req.group, side, self.current))
             if self.current == '' and self.t - t0 > 5:
                 break
 
@@ -40,10 +42,10 @@ class TokenHandle:
         
     def currentCB(self, msg):
         self.t = rospy.Time.now().to_sec()
-        if self.req.arm == 2:
-            self.current = msg.right
-        else:
+        if self.req.arm in (0,1):
             self.current = msg.left
+        elif self.req.arm in (0,2) or msg.right != self.req.group:
+            self.current = msg.right
                                 
             
     def update(self):

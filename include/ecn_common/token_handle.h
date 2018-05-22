@@ -51,10 +51,10 @@ public:
     void callback(const ecn_common::TokenCurrentConstPtr & msg)
     {
         t_ = ros::Time::now().toSec();
-        if(req_.arm == 2)
-            current_ = msg->right;
-        else
-            current_  = msg->left;
+        if(req_.arm < 2)
+            current_ = msg->left;
+        else if(req_.arm % 2 == 0 || msg->right != req_.group)
+            current_  = msg->right;
     }
 
     void update()

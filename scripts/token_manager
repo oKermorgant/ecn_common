@@ -15,86 +15,47 @@ class TokenManager:
         self.pub = rospy.Publisher('/token_manager/current', TokenCurrent, queue_size=1)
         
         self.sub = rospy.Subscriber('token_manager/request', TokenRequest, self.requestCB)
-        self.left = {}
-        self.right = {}
+        self.left = []  # (t0, name, t_last)
+        self.right = []
                 
-    def update(self, group, d, t, current):
+    def update(self, name, groups, t):
         
         # remove groups that have not checked for a while
-        keys = d.keys()
-        for key in keys:
-            if t - d[key][1] > 2:
-                d.pop(key)
+        groups = [g for g in groups if t - g[2] < 2]
                 
-        # update this group
-        if group in d:
-            d[group][1] = t
+        # update this group with current request
+        names = [g[1] for g in groups]
+        if name in names:
+            idx = names.index(name)
+            groups[idx][2] = t
         else:
-            d[group] = [t,t]
+            groups.append([t, name, t])
             
-        # check time of current owner
-        if current in d:
-            return d[current][1]
-        return 0
+        return groups
         
     def requestCB(self, req):
         
-        msg = req.group + ' asking for '
-        
         # get time
         t = rospy.Time.now().to_sec()
-        
+
         # update requests and get latest request from current
-        if req.arm == 0:
-            msg += 'both arms -> '
-            t0 = self.update(req.group, self.left, t, self.current.left)
-            t0 = max(t0, self.update(req.group, self.right, t, self.current.right))
-        elif req.arm == 1:
-            t0 = self.update(req.group, self.left, t, self.current.left)
-            msg += 'left arm -> '
-        else:
-            t0 = self.update(req.group, self.right, t, self.current.right)
-            msg += 'right arm -> '
-
-        ok = ('', req.group)
+        if req.arm in (0,1):
+            self.left = self.update(req.group, self.left, t)
+            self.current.left = self.left[0][1]
+        if req.arm in (0,2):
+            self.right = self.update(req.group, self.right, t)
+            self.current.right = self.right[0][1]
             
-        # check automatic token (void or already has it)
-        if req.arm == 0 and self.current.left in ok and self.current.right in ok:
-            self.current.left = req.group
-            self.current.right = req.group
-            msg += 'ok\n'
-        elif req.arm == 1 and self.current.left in ok:
-            self.current.left = req.group
-            msg += 'ok\n'
-        elif req.arm == 2 and self.current.right in ok:
-            self.current.right = req.group
-            msg += 'ok\n'
-        elif t0 == 0:
-            # current owner has not updated for 2 sec -> pass to oldest request            
-            if req.arm == 0:
-                self.current.left = min(self.left, key=lambda x: self.left[x][0])
-                self.current.right = min(self.right, key=lambda x: self.right[x][0])
-                if self.current.left == req.group and self.current.right == req.group:
-                    msg += 'ok\n'
-                else:
-                    msg += 'passed to ' + self.current.left + '\n'
-            elif req.arm == 1:
-                self.current.left = min(self.left, key=lambda x: self.left[x][0])
-                if self.current.left == req.group:
-                    msg += 'ok\n'
-                else:
-                    msg += 'passed to ' + self.current.left + '\n'
-            elif req.arm == 2:
-                self.current.right = min(self.right, key=lambda x: self.right[x][0])
-                if self.current.right == req.group:
-                    msg += 'ok\n'
-                else:
-                    msg += 'passed to ' + self.current.right + '\n' 
-        else:
-            msg += 'already used'
-
-        if debug or (not debug and 'used' not in msg):
-            print(msg)
+        # print summary
+        for group, side in ((self.left, 'left'), (self.right ,'right')):
+            if len(group):
+                msg = side + ': ' + group[0][1]
+                if len(group) > 1:
+                    msg += ', queue = ' + ', '.join([g[1] for g in group[1:]])
+                print(msg)    
+        print('')
+                
+            
         # publish current tokens
         self.pub.publish(self.current)
 

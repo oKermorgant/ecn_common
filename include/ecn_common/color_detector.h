@@ -1,7 +1,7 @@
 #ifndef COLORDETECTOR_H
 #define COLORDETECTOR_H
 
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 
 namespace ecn

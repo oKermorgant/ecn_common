@@ -13,7 +13,14 @@ if len(sys.argv) == 5:
     rospy.sleep(int(sys.argv[1]))
     kill = int(sys.argv[2])
     
-token = TokenHandle(group_name)
+side = ''
+r = rand()
+if r < 0.2:
+    side = 'left'
+elif r < .4:
+    side = 'right'
+    
+token = TokenHandle(group_name, side)
 
 t0 = rospy.Time.now().to_sec()
 
