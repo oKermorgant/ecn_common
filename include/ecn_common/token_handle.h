@@ -35,8 +35,16 @@ public:
         {
             update();
             if(current_ != req_.group && current_ != "")
-                ROS_INFO("Current token is for group %s", current_.c_str());
-            if(current_ == "" && t_ - t0 > 5)
+            {
+                std::string side = "both arms";
+                if(req_.arm == 1)
+                    side = "left arm";
+                else if(req_.arm == 2)
+                    side = "right arm";
+
+                ROS_INFO("Group %s (%s): current token is for group %s", req_.group.c_str(), side.c_str(), current_.c_str());
+            }
+                if(current_ == "" && t_ - t0 > 5)
                 break;
 
             loop.sleep();
