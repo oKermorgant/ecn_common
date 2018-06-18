@@ -1,4 +1,4 @@
-#include<ecn_common/optim.h>
+#include<ecn_common/vpQuadProg.h>
 
 using std::cout;
 using std::endl;
@@ -12,8 +12,8 @@ void summary(std::string legend,
     cout << legend << "\n";
     cout << "    Minimum at " << x.t() << '\n';
     cout << "    Objective: " << (Q*x - r).euclideanNorm() << '\n';
-    cout << "    Equalities (should be = 0): " << (A*x-b).t() << '\n';
-    cout << "    Inequalities (should be <= 0): " << (C*x-d).t() << '\n' << '\n';
+    cout << "    Equalities (should be = 0 if considered): " << (A*x-b).t() << '\n';
+    cout << "    Inequalities (should be <= 0 if considered): " << (C*x-d).t() << '\n' << '\n';
 }
 
 int main()
@@ -38,7 +38,7 @@ int main()
      */
 
     // objective Q & r
-    vpMatrix Q(2,2);    Q[0][0] = 1;
+    vpMatrix Q;Q.eye(2);
     vpColVector r(2);   r[0] = -3;
 
     // equality constraint A & b
@@ -49,7 +49,7 @@ int main()
     // inequality constraint C & d
     vpMatrix C(5,2);
     C[0][0] =       C[1][1] = -1;
-    C[2][0] = -1;   C[2][1] = -3;
+    C[2][0] = -1;   C[2][1] = -1;
     C[3][0] = 2;    C[3][1] = 5;
     C[4][0] = 3;    C[4][1] = 4;
     vpColVector d(5);
@@ -58,20 +58,23 @@ int main()
     // solution vector
     vpColVector x;
 
+    // solver
+    vpQuadProg qp;
+
     // without constraints: no need for a solver
     x = Q.pseudoInverse() * r;
     summary("No constraints", Q, r, A, b, C, d, x);
 
 
     // with only equalities
-    ecn::solveQPe(Q, r, A, b, x);
+    qp.solveQPe(Q, r, A, b, x);
     summary("Equality constraints", Q, r, A, b, C, d, x);
 
     // with only inequalities
-    ecn::solveQPi(Q, r, C, d, x);
+    qp.solveQPi(Q, r, C, d, x);
     summary("Inequality constraints", Q, r, A, b, C, d, x);
 
     // with equalities + only inequalities
-    ecn::solveQP(Q, r, A, b, C, d, x);
+    qp.solveQP(Q, r, A, b, C, d, x);
     summary("Both constraints", Q, r, A, b, C, d, x);
 }

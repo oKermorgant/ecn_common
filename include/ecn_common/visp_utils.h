@@ -1,5 +1,5 @@
-#ifndef OPTIM_H
-#define OPTIM_H
+#ifndef vispUtils_H
+#define vispUtils_H
 #include <visp/vpSubMatrix.h>
 #include <visp/vpSubColVector.h>
 
@@ -37,8 +37,8 @@ void putAt(vpColVector &_e, const vpColVector &_esub, const unsigned int r)
 }
 
 
-
 // basic QP solvers
+// no warm start, no dimension reduction
 
 /* Solves a quadratic minimization under equality constraint with projection approach
  * Just a particular case of general problem
@@ -66,4 +66,4 @@ void solveQP ( const vpMatrix &_Q, const vpColVector &_r, vpMatrix _A, vpColVect
 }
 
 
-#endif // OPTIM_H
+#endif // vispUtils_H

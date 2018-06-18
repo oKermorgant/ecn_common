@@ -3,7 +3,6 @@ project(ecn_common)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
-set(CMAKE_BUILD_TYPE Release)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
@@ -49,10 +48,17 @@ include_directories(
 ## Main C++ library
 add_library(${PROJECT_NAME}
                 include/ecn_common/token_handle.h
-                include/ecn_common/optim.h
-                src/optim.cpp
+                include/ecn_common/visp_utils.h
                 include/ecn_common/color_detector.h
-                src/color_detector.cpp )
+                src/color_detector.cpp
+                include/ecn_common/qr.h
+                src/qr.cpp
+                include/ecn_common/vpLinProg.h
+                src/vpLinProg.cpp
+                include/ecn_common/vpQuadProg.h
+                src/vpQuadProg.cpp
+                )
+
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${VISP_LIBRARIES})
 
 ## Test executables

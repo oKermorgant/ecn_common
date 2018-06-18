@@ -6,7 +6,7 @@
 #include <cv_bridge/cv_bridge.h>
 
 using namespace std;
-using ecn::ColorDetector;
+//using ecn::ColorDetector;
 
 cv::Mat im;
 bool im_ok;
@@ -36,7 +36,7 @@ int main(int argc, char** argv)
         g = atoi(argv[2]);
         b = atoi(argv[3]);
     }
-    ColorDetector cd(r, g, b);
+    ecn::ColorDetector cd(r, g, b);
     cd.showSegmentation();  // also gives trackbars for saturation / value
     cd.showOutput();
     cd.fitCircle();
