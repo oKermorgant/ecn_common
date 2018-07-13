@@ -27,6 +27,7 @@ class TokenHandle:
         t0 = rospy.Time.now().to_sec()
 
         while not rospy.is_shutdown() and self.current != self.req.group:
+            self.t = rospy.Time.now().to_sec()
             self.update()
             
             if self.current != self.req.group and self.current != '':

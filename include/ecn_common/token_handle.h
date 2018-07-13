@@ -27,12 +27,13 @@ public:
         sub_ = nh_.subscribe("/token_manager/current", 1, &TokenHandle::callback, this);
         current_ = "";
         double t0;
-        t_ = t0 = ros::Time::now().toSec();
+        t0 = ros::Time::now().toSec();
 
         // wait for token manager
         ros::Rate loop(1);
         while(ros::ok() && current_ != req_.group)
         {
+            t_ = ros::Time::now().toSec();
             update();
             if(current_ != req_.group && current_ != "")
             {

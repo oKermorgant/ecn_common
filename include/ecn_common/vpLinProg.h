@@ -51,19 +51,24 @@
 /*!
   \class vpLinProg
   \ingroup group_core_optim
-  \brief This class provides two for Linear Programs.
+  \brief This class provides two solvers for Linear Programs.
 
   One is a classical simplex, the other can deal with various inequality or bound constraints.
+
+  Utility functions to reduce or check linear equalities or inequalities are also available.
+
+  \warning The solvers are only available if C++11 is activated during compilation. Configure ViSP using cmake -DUSE_CPP11=ON.
 */
 class VISP_EXPORT vpLinProg
 {
 public:
 
-  /*!
+#ifndef ECN_VISP_HAVE_CPP11_COMPATIBILITY
+/*!
   Used to pass a list of bounded variables to solveLP(), as a list of (index, bound).
 
-The used type is compatible with C++11's braced initialization and
-construction can be done in the call to solveLP or before, as shown in this example:
+The type is compatible with C++11's braced initialization.
+ Construction can be done in the call to solveLP or before, as shown in this example:
 
   \f$\begin{array}{lll}
   (x,y,z) = &  \arg\min & -2x -3y -4z\\
@@ -73,6 +78,9 @@ construction can be done in the call to solveLP or before, as shown in this exam
                 & \text{s.t.}& z \leq 6\end{array}\f$
 
   Here the lower bound is built explicitely while the upper one is built during the call to solveLP():
+
+  \warning This function is only available if C++11 is activated during compilation. Configure ViSP using cmake -DUSE_CPP11=ON.
+
   \code
   #include <visp3/core/vpLinProg.h>
 
@@ -85,14 +93,19 @@ construction can be done in the call to solveLP or before, as shown in this exam
     C[0][0] = 3;    C[0][1] = 2; C[0][2] = 1; d[0] = 10;
     C[1][0] = 2; C[1][1] = 5; C[1][2] = 3;  d[1] = 15;
 
-    // build lower bounds as all indices x_i >= 0
+    // build lower bounds explicitely as a std::vector of std::pair<int, double>
     std::vector<vpLinProg::BoundedIndex> lower_bound;
-    for(int i = 0; i < 3; ++i)
-      lower_bound.push_back({i, 0.});
+    for(unsigned int i = 0; i < 3; ++i)
+    {
+      vpLinProg::BoundedIndex bound;
+      bound.first = i;    // index
+      bound.second = 0;   // lower bound for this index
+      lower_bound.push_back(bound);
+    }
 
     if(vpLinProg::solveLP(c, vpMatrix(0,0), vpColVector(0), C, d, x,
                           lower_bound,
-                          {{2,6}}))
+                          {{2,6}})) // upper bound is passed with braced initialization
     {
         std::cout << "x: " << x.t() << std::endl;
         std::cout << "cost: " << c.t()*x << std::endl;
@@ -102,8 +115,7 @@ construction can be done in the call to solveLP or before, as shown in this exam
 
     \sa solveLP()
   */
-  typedef std::pair<int, double> BoundedIndex;
-
+  typedef std::pair<unsigned int, double> BoundedIndex;
 
   /** @name Solvers  */
   //@{
@@ -112,11 +124,12 @@ construction can be done in the call to solveLP or before, as shown in this exam
 
   static bool solveLP(const vpColVector &c, vpMatrix A, vpColVector b,
                       const vpMatrix &C, const vpColVector &d, vpColVector &x,
-                      std::vector<BoundedIndex> l = std::vector<BoundedIndex>(),
-                      std::vector<BoundedIndex> u = std::vector<BoundedIndex>(),
+                      std::vector<BoundedIndex> l = {},
+                      std::vector<BoundedIndex> u = {},
                       const double &tol = 1e-6);
 
   //@}
+#endif
 
   /** @name Dimension reduction for equality constraints  */
   //@{
@@ -221,7 +234,4 @@ construction can be done in the call to solveLP or before, as shown in this exam
   }
   //@}
 };
-
-
-
 #endif // vpLinProgh

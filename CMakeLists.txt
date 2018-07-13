@@ -14,9 +14,11 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   message_generation
   rospy
+  urdf
 )
 
 find_package(VISP REQUIRED)
+find_package(OpenCV 3 REQUIRED)
 
 # Python libs
 catkin_python_setup()
@@ -30,11 +32,11 @@ add_message_files(
 generate_messages()
 
 catkin_package(
-  INCLUDE_DIRS include
+  INCLUDE_DIRS include ${VISP_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS rospy cv_bridge roscpp image_transport std_msgs
                     sensor_msgs geometry_msgs
-  DEPENDS ${VISP_LIBRARIES}
+  DEPENDS ${VISP_LIBRARIES} ${OpenCV_LIBS}
 )
 
 ## Specify additional locations of header files
@@ -57,8 +59,8 @@ add_library(${PROJECT_NAME}
                 src/vpLinProg.cpp
                 include/ecn_common/vpQuadProg.h
                 src/vpQuadProg.cpp
+                include
                 )
-
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${VISP_LIBRARIES})
 
 ## Test executables

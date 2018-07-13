@@ -27,7 +27,7 @@ int allocate_work(double **work)
 
 #endif
 
-int QR(const vpMatrix &M, vpMatrix &Q, vpMatrix &R, bool full, bool squareR, double tol)
+unsigned int QR(const vpMatrix &M, vpMatrix &Q, vpMatrix &R, bool full, bool squareR, double tol)
 {
 #ifdef VISP_HAVE_LAPACK_C
     // do the decomposition here...
@@ -155,7 +155,7 @@ int QR(const vpMatrix &M, vpMatrix &Q, vpMatrix &R, bool full, bool squareR, dou
     delete[] qrdata;
     delete[] work;
     delete[] tau;
-    return r;
+    return (unsigned int) r;
 
 #else
     throw(vpException::fatalError, "Cannot perform QR decomposition. Install Lapack 3rd party"));
@@ -163,7 +163,7 @@ int QR(const vpMatrix &M, vpMatrix &Q, vpMatrix &R, bool full, bool squareR, dou
 }
 
 
-int QRPivot(const vpMatrix &M, vpMatrix &Q, vpMatrix &R, vpMatrix &P, bool full, bool squareR, double tol)
+unsigned int QRPivot(const vpMatrix &M, vpMatrix &Q, vpMatrix &R, vpMatrix &P, bool full, bool squareR, double tol)
 {
 #ifdef VISP_HAVE_LAPACK_C
     integer m = (integer) M.getRows();     // also rows of Q
@@ -316,7 +316,7 @@ int QRPivot(const vpMatrix &M, vpMatrix &Q, vpMatrix &R, vpMatrix &P, bool full,
     delete[] work;
     delete[] tau;
     delete[] p;
-    return r;
+    return (unsigned int) r;
 #else
     throw(vpException::fatalError, "Cannot perform QR decomposition. Install Lapack 3rd party"));
 #endif
@@ -347,8 +347,9 @@ vpMatrix inverseTriangular(const vpMatrix &A, bool upper)
                       << std::endl;
             std::cout << "R=" << std::endl << A << std::endl;
         }
-        return R;
+        throw vpMatrixException::divideByZeroError;
     }
+    return R;
 }
 
 vpColVector solveByQR(const vpMatrix &A, const vpColVector &b)
