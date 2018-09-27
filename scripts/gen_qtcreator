@@ -90,7 +90,7 @@ template_file = ecn_common_path + '/CMakeLists.txt.user.template'
 if not os.path.exists(template_file) and 'lib/ecn_common' in ecn_common_path:
     config = file(ecn_common_path.replace('lib/ecn_common', 'share/ecn_common') + '/CMakeLists.txt.user.template').read()
 else:
-    config = file(ecn_common_path + '/CMakeLists.txt.user.template').read()
+    config = file(template_file).read()
 
 # header = version / time / envID
 ct = localtime()
