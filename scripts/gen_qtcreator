@@ -1,0 +1,131 @@
+#! /usr/bin/env python
+
+import rospy
+import sys
+import os
+from time import localtime, sleep
+
+def dict_replace(s, d):
+    for key in d:
+        s = s.replace(key, d[key])
+    return s
+
+home = os.path.expanduser('~') + '/'
+envID_file = home + '.config/QtProject/QtCreator.ini'
+confID_file = home + '.config/QtProject/qtcreator/profiles.xml'
+cmake_dir = os.path.abspath(len(sys.argv) == 1 and '.' or sys.argv[1])
+cmake_file = cmake_dir + '/CMakeLists.txt'
+cmake_user = cmake_file + '.user'
+
+if not os.path.exists(envID_file) or not os.path.exists(confID_file):
+    print('Will run QtCreator once to generate local configuration')
+    sleep(3)
+    os.system('qtcreator&')
+    sleep(5)
+    os.system('killall qtcreator')
+    #print('Please run QtCreator at least once before automatic configuration')
+    #sys.exit(0)
+    
+# get ID's on this computer
+with open(envID_file) as f:
+    envID = f.read().split('Settings\EnvironmentId=@ByteArray(')[1].split(')')[0]
+with open(confID_file) as f:
+    data = f.read()
+    confID = data.split('<value type="QString" key="PE.Profile.Id">')[1].split('<')[0]
+    qtcVersion = data.split('<!-- Written by QtCreator ')[1].split(', ')[0]
+        
+if not os.path.exists(cmake_file):
+    print('Could not find CMakeLists.txt, exiting')
+    sys.exit(0)
+
+if os.path.exists(cmake_user):
+    ans = 'not good'
+    while ans not in ('y','n',''):
+        ans = raw_input('CMakeLists.txt.user already exists, should I delete it [Y/n]: ').lower()
+    if ans == 'n':
+        print('CMakeLists.txt.user already exists, exiting')
+        sys.exit(0)
+        
+cmake = file(cmake_file).read().splitlines()
+package = ''
+targets = []
+build_type = 'Debug'
+ros_package = False
+
+for line in cmake:
+    if 'project(' in line:
+        package = line.split('(')[1].replace(' ', '').replace(')', '')
+    elif 'add_executable(' in line:
+        start = line.find('add_executable')
+        targets.append(line[start:].replace('(',' ').split(' ')[1])
+    elif 'CMAKE_BUILD_TYPE' in line:
+        build_type = line.replace('set','').replace('CMAKE_BUILD_TYPE','').replace('(','').replace(')','').replace(' ','')
+    elif 'catkin_package' in line:
+        ros_package = True
+        
+# check build directory
+build_dir = cmake_dir + '/build'
+bin_dir = build_dir
+if ros_package:
+    ros_dir = cmake_dir + '/..'
+    while 'src' not in os.listdir(ros_dir):
+        ros_dir += '/..'
+        if ros_dir in ('/', '//'):
+            print('This ROS package does not seem to be in any workspace, exiting')
+            sys.exit(0)
+    ros_dir = os.path.abspath(ros_dir)        
+    build_dir = ros_dir + '/build/' + package
+    bin_dir = ros_dir + '/devel/.private/' + package + '/lib'
+    if not os.path.exists(build_dir):
+        print('You will have to run "catkin build" before loading the project in Qt Creator')
+elif not os.path.exists(build_dir):
+    os.mkdir('build')
+    
+print('Loading ' + os.path.abspath(cmake_file))
+print('  build directory: ' + os.path.abspath(build_dir))
+print('  bin directory:   ' + os.path.abspath(bin_dir))
+        
+# load configuration template
+ecn_common_path = os.path.dirname(os.path.abspath(__file__))
+if 'lib/ecn_common' in ecn_common_path:
+    config = file(ecn_common_path.replace('lib/ecn_common', 'share/ecn_common') + '/CMakeLists.txt.user.template').read()
+else:
+    config = file(ecn_common_path + '/CMakeLists.txt.user.template').read()
+
+# header = version / time / envID
+ct = localtime()
+ct_str = []
+for key in ('year', 'mon', 'mday','hour','min','sec'):
+    ct_str.append(str(getattr(ct, 'tm_'+key)).zfill(2))
+time_str = '{}-{}-{}T{}:{}:{}'.format(*ct_str)
+
+replace_dict = {}
+replace_dict['<gen_version/>'] =  qtcVersion
+replace_dict['<gen_time/>'] =  '{}-{}-{}T{}:{}:{}'.format(*ct_str)
+replace_dict['<gen_envID/>'] = envID
+replace_dict['<gen_cmake_build_type/>'] = build_type
+replace_dict['<gen_build_dir/>'] = build_dir
+replace_dict['<gen_conf/>'] = confID
+replace_dict['<gen_target_count/>'] = str(len(targets))
+config = dict_replace(config, replace_dict)
+
+# target blocks
+start = config.find('<!-- gen_target_begin -->')
+start += config[start:].find('\n') + 1
+end  = config.find('<!-- gen_target_end -->')-1
+
+target_block = [config[start:end] for target in targets]
+
+for i,target in enumerate(targets):
+    replace_dict = {}
+    replace_dict['<gen_target_nb/>'] = str(i)
+    replace_dict['<gen_target_exec/>'] = target
+    replace_dict['<gen_bin_dir/>'] = bin_dir
+    target_block[i] = dict_replace(target_block[i], replace_dict)
+    print('  found target ' + target)
+
+config = config.replace(config[start:end], '\n'.join(target_block))
+
+with open(cmake_user, 'w') as f:
+    f.write(config)
+

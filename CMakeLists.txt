@@ -82,7 +82,7 @@ target_link_libraries(hist ${PROJECT_NAME})
 ## Install ##
 #############
 
-catkin_install_python(PROGRAMS scripts/token_manager examples/token_python_example
+catkin_install_python(PROGRAMS scripts/token_manager examples/token_python_example scripts/gen_qtcreator
                       DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
  # only install actual library
@@ -100,4 +100,9 @@ catkin_install_python(PROGRAMS scripts/token_manager examples/token_python_examp
 
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+  PATTERN ".svn" EXCLUDE)
+
+  install(DIRECTORY scripts/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  FILES_MATCHING PATTERN "*.user.template"
   PATTERN ".svn" EXCLUDE)
