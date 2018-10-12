@@ -100,6 +100,19 @@ bool vpLinProg::colReduction(vpMatrix &A, vpColVector &b, bool full_rank, const 
   const unsigned int m = A.getRows();
   const unsigned int n = A.getCols();
 
+  // degeneracy if A is actually null
+  if(A.infinityNorm() < tol)
+  {
+    if(b.infinityNorm() < tol)
+    {
+      b.resize(n);
+      A.eye(n);
+      return true;
+    }
+    else
+      return false;
+  }
+
   // try with standard QR
   vpMatrix Q, R;
   unsigned int r;
@@ -129,13 +142,13 @@ bool vpLinProg::colReduction(vpMatrix &A, vpColVector &b, bool full_rank, const 
         IQQt[j][j] += 1;
       // most of the time the first n-m columns are just fine
       A = IQQt.extract(0,0,n,n-m);
-      if((A.t()*A).detByLU() < tol)
+      if(ecn::QR(A, Q, R, false, false, tol) != n-m)
       {
         // rank deficiency, manually find n-m independent columns
         unsigned int j0;
-        for (j0 = 0; j0 < n; ++j0)
+        for(j0 = 0; j0 < n; ++j0)
         {
-          if(!vpLinProg::allZero(IQQt.getCol(j0)))
+          if(!allZero(IQQt.getCol(j0)))
           {
             A = IQQt.getCol(j0);
             break;
@@ -146,10 +159,10 @@ bool vpLinProg::colReduction(vpMatrix &A, vpColVector &b, bool full_rank, const 
         while(A.getCols() < n-m)
         {
           // add next column and check rank of A^T.A
-          if (!vpLinProg::allZero(IQQt.getCol(j)))
+          if(!allZero(IQQt.getCol(j)))
           {
             A = vpMatrix::juxtaposeMatrices(A, IQQt.getCol(j));
-            if((A.t()*A).detByLU() < tol)
+            if(ecn::QR(A, Q, R, false, false, tol) != A.getCols())
               A.resize(n,A.getCols()-1, false);
           }
           j++;
@@ -180,13 +193,13 @@ bool vpLinProg::colReduction(vpMatrix &A, vpColVector &b, bool full_rank, const 
       IQQt[j][j] += 1;
     // most of the time the first n-r columns are just fine
     A = IQQt.extract(0,0,n,n-r);
-    if((A.t()*A).detByLU() < tol)
+    if(ecn::QR(A, Q, R, false, false, tol) != n-r)
     {
       // rank deficiency, manually find n-r independent columns
       unsigned int j0;
       for(j0 = 0; j0 < n; ++j0)
       {
-        if(!vpLinProg::allZero(IQQt.getCol(j0)))
+        if(!allZero(IQQt.getCol(j0)))
         {
           A = IQQt.getCol(j0);
           break;
@@ -197,10 +210,10 @@ bool vpLinProg::colReduction(vpMatrix &A, vpColVector &b, bool full_rank, const 
       while(A.getCols() < n-r)
       {
         // add next column and check rank of A^T.A
-        if(!vpLinProg::allZero(IQQt.getCol(j)))
+        if(!allZero(IQQt.getCol(j)))
         {
           A = vpMatrix::juxtaposeMatrices(A, IQQt.getCol(j));
-          if((A.t()*A).detByLU() < tol)
+          if(ecn::QR(A, Q, R, false, false, tol) != A.getCols())
             A.resize(n,A.getCols()-1, false);
         }
         j++;

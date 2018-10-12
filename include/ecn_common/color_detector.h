@@ -22,8 +22,8 @@ struct CamParam
         const double t = tan(field_of_view*M_PI/360.);   // tan(fov/2) in rad
         u0 = width/2.;
         v0 = height/2.;
-        ipx = t/u0;
-        ipy = t/v0;
+        ipx = tan(field_of_view*M_PI/360.)/u0;
+        ipy = ipx;
         px = 1./ipx;
         py = 1./ipy;
     }
