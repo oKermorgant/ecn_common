@@ -12,3 +12,12 @@ It is composed of:
 ## Color detector
 
 This class allows versatile single-object color segmentation from RGB and tracking (x/y/area). Can display the segmented image to help threshold tuning and can be set to fit a circle.
+
+## Linear program and Quadratic program solvers
+
+The `vpLinProg` and `vpQuadProg` are available in this package to be used during labs. They have been submitted to ViSP and will be deprecated from ecn_common when ViSP 3.2.0 is released.
+
+## Generator for Qt Creator
+
+By running `rosrun ecn_common gen_qtcreator` in a CMake project (may it be ROS or non-ROS), this script will generate the Qt Creator configuration file.
+It assumes that a non-ROS project is compiled into a `build` directory within the project.
