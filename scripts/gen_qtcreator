@@ -3,23 +3,36 @@
 import sys
 import os
 from time import localtime, sleep
+from subprocess import check_output
+import argparse
 
 def dict_replace(s, d):
     for key in d:
         s = s.replace(key, d[key])
     return s
 
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.description = 'A script to generate Qt Creator configuration file for CMake projects.'
+parser.add_argument('-c', metavar='cmakelist_dir', help='Folder of CMakeLists.txt file',default='.')
+parser.add_argument('-b', metavar='build_dir', help='Relative build folder',default='./build')
+args = parser.parse_args()
+
 home = os.path.expanduser('~') + '/'
 envID_file = home + '.config/QtProject/QtCreator.ini'
 confID_file = home + '.config/QtProject/qtcreator/profiles.xml'
-cmake_dir = os.path.abspath(len(sys.argv) == 1 and '.' or sys.argv[1])
+cmake_dir = os.path.abspath(args.c)
 cmake_file = cmake_dir + '/CMakeLists.txt'
 cmake_user = cmake_file + '.user'
+build_dir = os.path.abspath(cmake_dir + '/' + args.b)
 
 if not os.path.exists(envID_file) or not os.path.exists(confID_file):
     print('Will run QtCreator once to generate local configuration')
     sleep(3)
     os.system('qtcreator&')
+    out = ''
+    while 'qtcreator' not in out:
+        out = check_output(['ps','-A'])
+        sleep(1)
     sleep(5)
     os.system('killall qtcreator')
     #print('Please run QtCreator at least once before automatic configuration')
@@ -35,6 +48,7 @@ with open(confID_file) as f:
         
 if not os.path.exists(cmake_file):
     print('Could not find CMakeLists.txt, exiting')
+    print('Given location: ', cmake_file)
     sys.exit(0)
 
 if os.path.exists(cmake_user):
@@ -63,7 +77,6 @@ for line in cmake:
         ros_package = True
         
 # check build directory
-build_dir = cmake_dir + '/build'
 bin_dir = build_dir
 if ros_package:
     ros_dir = cmake_dir + '/..'
