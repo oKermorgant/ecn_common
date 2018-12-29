@@ -2,6 +2,7 @@
 
 import sys
 import os
+from shutil import rmtree
 from time import localtime, sleep
 from subprocess import check_output
 import argparse
@@ -15,7 +16,13 @@ parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFo
 parser.description = 'A script to generate Qt Creator configuration file for CMake projects.'
 parser.add_argument('-c', metavar='cmakelist_dir', help='Folder of CMakeLists.txt file',default='.')
 parser.add_argument('-b', metavar='build_dir', help='Relative build folder',default='./build')
+parser.add_argument('--force', action='store_true', default=False, help='Forces relative build folder')
+parser.add_argument('--clean', action='store_true', default=False)
+parser.add_argument('--yes', action='store_true', default=False)
 args = parser.parse_args()
+
+if args.clean:
+    args.yes = True
 
 home = os.path.expanduser('~') + '/'
 envID_file = home + '.config/QtProject/QtCreator.ini'
@@ -51,7 +58,7 @@ if not os.path.exists(cmake_file):
     print('Given location: ', cmake_file)
     sys.exit(0)
 
-if os.path.exists(cmake_user):
+if os.path.exists(cmake_user) and not args.yes:
     ans = 'not good'
     while ans not in ('y','n',''):
         ans = raw_input('CMakeLists.txt.user already exists, should I delete it [Y/n]: ').lower()
@@ -78,20 +85,22 @@ for line in cmake:
         
 # check build directory
 bin_dir = build_dir
-if ros_package:
-    ros_dir = cmake_dir + '/..'
+if ros_package and not args.force:
+    ros_dir = os.path.abspath(cmake_dir + '/..')
     while 'src' not in os.listdir(ros_dir):
-        ros_dir += '/..'
+        ros_dir = os.path.abspath(ros_dir + '/..')
         if ros_dir in ('/', '//'):
             print('This ROS package does not seem to be in any workspace, exiting')
-            sys.exit(0)
-    ros_dir = os.path.abspath(ros_dir)        
+            sys.exit(0)      
     build_dir = ros_dir + '/build/' + package
     bin_dir = ros_dir + '/devel/.private/' + package + '/lib'
     if not os.path.exists(build_dir):
         print('You will have to run "catkin build" before loading the project in Qt Creator')
 elif not os.path.exists(build_dir):
-    os.mkdir('build')
+    os.mkdir(build_dir)
+elif args.clean:
+    rmtree(build_dir)
+    os.mkdir(build_dir)
     
 print('Loading ' + os.path.abspath(cmake_file))
 print('  build directory: ' + os.path.abspath(build_dir))
