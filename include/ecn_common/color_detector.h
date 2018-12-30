@@ -3,6 +3,7 @@
 
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
+#include <cv_bridge/cv_bridge.h>
 
 namespace ecn
 {
@@ -85,6 +86,12 @@ public:
 
     // processing functions
     std::vector<cv::Point> findMainContour(const cv::Mat &_im);
+
+    bool process(const sensor_msgs::ImageConstPtr &_msg, cv::Mat &_im_processed, bool write_output = true)
+    {
+      return process(cv_bridge::toCvShare(_msg, "bgr8")->image,
+                     _im_processed, write_output);
+    }
     bool process(const cv::Mat &_im, cv::Mat &_im_processed, bool write_output = true);
     bool process(const cv::Mat &_im);
 
