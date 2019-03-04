@@ -96,12 +96,12 @@ public:
     bool process(const cv::Mat &_im);
 
     // get resulting info
-    inline double x() {return (x_-cam.u0)*cam.ipx;}
-    inline double y() {return (y_-cam.v0)*cam.ipy;}
-    inline double area() {return area_*cam.ipx*cam.ipy;}
-    inline double x_p() {return x_;}
-    inline double y_p() {return y_;}
-    inline double area_p() {return area_;}
+    inline double x() const {return (x_-cam.u0)*cam.ipx;}
+    inline double y() const {return (y_-cam.v0)*cam.ipy;}
+    inline double area() const {return area_*cam.ipx*cam.ipy;}
+    inline double x_p() const {return x_;}
+    inline double y_p() const {return y_;}
+    inline double area_p() const {return area_;}
     CamParam cam;
 
 protected:    

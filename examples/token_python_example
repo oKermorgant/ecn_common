@@ -20,7 +20,7 @@ if r < 0.2:
 elif r < .4:
     side = 'right'
     
-token = TokenHandle(group_name, side)
+token = TokenHandle(side, group_name)
 
 t0 = rospy.Time.now().to_sec()
 
