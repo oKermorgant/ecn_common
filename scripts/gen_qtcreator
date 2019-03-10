@@ -45,13 +45,18 @@ if not os.path.exists(envID_file) or not os.path.exists(confID_file):
     #print('Please run QtCreator at least once before automatic configuration')
     #sys.exit(0)
     
-# get ID's on this computer
+# get ID's on this computer and Qt Creator version
 with open(envID_file) as f:
     envID = f.read().split('Settings\EnvironmentId=@ByteArray(')[1].split(')')[0]
 with open(confID_file) as f:
     data = f.read()
     confID = data.split('<value type="QString" key="PE.Profile.Id">')[1].split('<')[0]
     qtcVersion = data.split('<!-- Written by QtCreator ')[1].split(', ')[0]
+    
+pre48 = False
+for i in xrange(8):
+    if qtcVersion.startswith('4.{}'.format(i)):
+        pre48 = True
         
 if not os.path.exists(cmake_file):
     print('Could not find CMakeLists.txt, exiting')
@@ -108,9 +113,12 @@ print('  bin directory:   ' + os.path.abspath(bin_dir))
         
 # load configuration template
 ecn_common_path = os.path.dirname(os.path.abspath(__file__))
-template_file = ecn_common_path + '/CMakeLists.txt.user.template'
+
+template_name = pre48 and 'CMakeLists.txt.user.template.pre4.8' or 'CMakeLists.txt.user.template'
+template_file = ecn_common_path + '/' + template_name
+
 if not os.path.exists(template_file) and 'lib/ecn_common' in ecn_common_path:
-    config = file(ecn_common_path.replace('lib/ecn_common', 'share/ecn_common') + '/CMakeLists.txt.user.template').read()
+    config = file(ecn_common_path.replace('lib/ecn_common', 'share/ecn_common') + '/' + template_name).read()
 else:
     config = file(template_file).read()
 
@@ -125,6 +133,7 @@ replace_dict = {}
 replace_dict['<gen_version/>'] =  qtcVersion
 replace_dict['<gen_time/>'] =  '{}-{}-{}T{}:{}:{}'.format(*ct_str)
 replace_dict['<gen_envID/>'] = envID
+replace_dict['<gen_cmake_dir/>'] = cmake_dir
 replace_dict['<gen_cmake_build_type/>'] = build_type
 replace_dict['<gen_build_dir/>'] = build_dir
 replace_dict['<gen_conf/>'] = confID
