@@ -12,6 +12,9 @@ def dict_replace(s, d):
         s = s.replace(key, d[key])
     return s
 
+def in_between(s,left='(',right=')'):
+    return s.partition(left)[2].partition(right)[0].strip(' ')
+
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.description = 'A script to generate Qt Creator configuration file for CMake projects.'
 parser.add_argument('-c', metavar='cmakelist_dir', help='Folder of CMakeLists.txt file',default='.')
@@ -79,12 +82,15 @@ ros_package = False
 
 for line in cmake:
     if 'project(' in line:
-        package = line.split('(')[1].replace(' ', '').replace(')', '')
+        package = in_between(line)
     elif 'add_executable(' in line:
         start = line.find('add_executable')
-        targets.append(line[start:].replace('(',' ').split(' ')[1])
+        if '#' not in line[:start]:
+            target = in_between(line,'(',' ')
+            if '$' not in target:
+                targets.append(target)
     elif 'CMAKE_BUILD_TYPE' in line:
-        build_type = line.replace('set','').replace('CMAKE_BUILD_TYPE','').replace('(','').replace(')','').replace(' ','')
+        build_type = in_between(line)
     elif 'catkin_package' in line:
         ros_package = True
         
