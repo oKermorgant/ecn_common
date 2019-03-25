@@ -12,14 +12,13 @@ def dict_replace(s, d):
         s = s.replace(key, d[key])
     return s
 
-def in_between(s,left='(',right=')'):
+def extract(s,left='(',right=')'):
     return s.partition(left)[2].partition(right)[0].strip(' ')
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.description = 'A script to generate Qt Creator configuration file for CMake projects.'
 parser.add_argument('-c', metavar='cmakelist_dir', help='Folder of CMakeLists.txt file',default='.')
 parser.add_argument('-b', metavar='build_dir', help='Relative build folder',default='./build')
-parser.add_argument('--force', action='store_true', default=False, help='Forces relative build folder')
 parser.add_argument('--clean', action='store_true', default=False)
 parser.add_argument('--yes', action='store_true', default=False)
 args = parser.parse_args()
@@ -82,21 +81,21 @@ ros_package = False
 
 for line in cmake:
     if 'project(' in line:
-        package = in_between(line)
+        package = extract(line)
     elif 'add_executable(' in line:
         start = line.find('add_executable')
         if '#' not in line[:start]:
-            target = in_between(line,'(',' ')
+            target = extract(line,'(',' ')
             if '$' not in target:
                 targets.append(target)
     elif 'CMAKE_BUILD_TYPE' in line:
-        build_type = in_between(line)
+        build_type = extract(line)
     elif 'catkin_package' in line:
         ros_package = True
         
-# check build directory
+# check build directory - update if ROS unless manually set
 bin_dir = build_dir
-if ros_package and not args.force:
+if ros_package and not '-b' in sys.argv:
     ros_dir = os.path.abspath(cmake_dir + '/..')
     while 'src' not in os.listdir(ros_dir):
         ros_dir = os.path.abspath(ros_dir + '/..')
@@ -116,7 +115,7 @@ elif args.clean:
 print('Loading ' + os.path.abspath(cmake_file))
 print('  build directory: ' + os.path.abspath(build_dir))
 print('  bin directory:   ' + os.path.abspath(bin_dir))
-        
+
 # load configuration template
 ecn_common_path = os.path.dirname(os.path.abspath(__file__))
 
