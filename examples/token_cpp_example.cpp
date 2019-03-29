@@ -6,6 +6,8 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
+
+
     int kill = 0;
     if(argc == 5)
     {
@@ -24,7 +26,7 @@ int main(int argc, char** argv)
 
     ros::init(argc, argv, node_name.c_str());
 
-    ecn::TokenHandle token("", group_name);
+    ecn::TokenHandle token(group_name);
 
     ros::Rate loop(1);
     double t0 = ros::Time::now().toSec();

@@ -8,22 +8,30 @@
 namespace ecn
 {
 
+typedef enum
+{
+  BAXTER_LEFT,
+  BAXTER_RIGHT,
+  BAXTER_BOTH
+} Side;
+
 class TokenHandle
 {
 public:
-  TokenHandle(std::string side = "", std::string group = "")
+  TokenHandle(const Side& side = BAXTER_BOTH, const std::string& group = "")
   {
     if(group == "")
       init(side, getenv("USER"));
     else
       init(side, group);
   }
+  TokenHandle(const std::string &group, Side side = BAXTER_BOTH)
+    : TokenHandle(side, group) {}
 
   void update()
   {
     pub_.publish(req_);
   }
-
 
 protected:
   ros::NodeHandle nh_;
@@ -42,13 +50,13 @@ protected:
       current_  = msg->right;
   }
 
-  void init(std::string side, std::string group)
+  void init(Side side, std::string group)
   {
     // init message & publisher
     req_.group = group;
-    if(side == "")
+    if(side == BAXTER_BOTH)
       req_.arm = 0;
-    else if(side == "left")
+    else if(side == BAXTER_LEFT)
       req_.arm = 1;
     else
       req_.arm = 2;
