@@ -21,7 +21,7 @@ public:
   TokenHandle(const Side& side = BAXTER_BOTH, const std::string& group = "")
   {
     if(group == "")
-      init(side, getenv("USER"));
+      init(side, ros::this_node::getName());
     else
       init(side, group);
   }

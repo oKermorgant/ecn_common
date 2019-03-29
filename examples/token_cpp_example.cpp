@@ -6,8 +6,6 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-
-
     int kill = 0;
     if(argc == 5)
     {
@@ -21,12 +19,11 @@ int main(int argc, char** argv)
     stringstream ss;
     srand (time(NULL));
     ss << rand() % 255;
-    string node_name = "node_" + ss.str();
-    string group_name = ss.str();
+    const string node_name = "node_" + ss.str();
 
     ros::init(argc, argv, node_name.c_str());
 
-    ecn::TokenHandle token(group_name);
+    ecn::TokenHandle token;
 
     ros::Rate loop(1);
     double t0 = ros::Time::now().toSec();
@@ -36,7 +33,7 @@ int main(int argc, char** argv)
         if(kill && ros::Time::now().toSec() - t0 > kill)
             break;
 
-        cout << group_name << " doing its C++ job" << endl;
+        cout << node_name << " doing its C++ job" << endl;
 
         token.update();
 

@@ -2,12 +2,11 @@
 
 import rospy
 from ecn_common.msg import TokenCurrent, TokenRequest
-import os
 
 class TokenHandle:
     def __init__(self, side = '', group = ''):
         if group == '':
-            self.init(side, os.environ['USER'])
+            self.init(side, rospy.get_name())
         else:
             self.init(side, group)        
         
