@@ -106,5 +106,5 @@ install(DIRECTORY launch/
 
   install(DIRECTORY scripts/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  FILES_MATCHING PATTERN "*.user.template"
+  FILES_MATCHING PATTERN "*.user.template*"
   PATTERN ".svn" EXCLUDE)
