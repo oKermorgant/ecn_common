@@ -54,12 +54,7 @@ with open(confID_file) as f:
     data = f.read()
     confID = data.split('<value type="QString" key="PE.Profile.Id">')[1].split('<')[0]
     qtcVersion = data.split('<!-- Written by QtCreator ')[1].split(', ')[0]
-    
-pre48 = False
-for i in xrange(8):
-    if qtcVersion.startswith('4.{}'.format(i)):
-        pre48 = True
-        
+
 if not os.path.exists(cmake_file):
     print('Could not find CMakeLists.txt, exiting')
     print('Given location: ', cmake_file)
@@ -119,7 +114,12 @@ print('  bin directory:   ' + os.path.abspath(bin_dir))
 # load configuration template
 ecn_common_path = os.path.dirname(os.path.abspath(__file__))
 
-template_name = pre48 and 'CMakeLists.txt.user.template.pre4.8' or 'CMakeLists.txt.user.template'
+template_name = 'CMakeLists.txt.user.template.pre4.8'
+if qtcVersion.startswith('4.9'):
+    template_name = 'CMakeLists.txt.user.template'
+elif qtcVersion.startswith('4.8'):
+    template_name = 'CMakeLists.txt.user.template.4.8'
+    
 template_file = ecn_common_path + '/' + template_name
 
 if not os.path.exists(template_file) and 'lib/ecn_common' in ecn_common_path:
