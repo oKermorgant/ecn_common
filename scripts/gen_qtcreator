@@ -74,6 +74,8 @@ targets = []
 build_type = 'Debug'
 ros_package = False
 
+print('Loading ' + os.path.abspath(cmake_file))
+
 for line in cmake:
     if 'project(' in line:
         package = extract(line)
@@ -87,6 +89,10 @@ for line in cmake:
         build_type = extract(line)
     elif 'catkin_package' in line:
         ros_package = True
+        
+if len(targets) == 0:
+    print('  no C++ targets for ' + package)
+    sys.exit(0)
         
 # check build directory - update if ROS unless manually set
 bin_dir = build_dir
@@ -107,7 +113,6 @@ elif args.clean:
     rmtree(build_dir)
     os.mkdir(build_dir)
     
-print('Loading ' + os.path.abspath(cmake_file))
 print('  build directory: ' + os.path.abspath(build_dir))
 print('  bin directory:   ' + os.path.abspath(bin_dir))
 
@@ -158,7 +163,7 @@ for i,target in enumerate(targets):
     replace_dict['<gen_target_exec/>'] = target
     replace_dict['<gen_bin_dir/>'] = bin_dir
     target_block[i] = dict_replace(target_block[i], replace_dict)
-    print('  found target ' + target)
+    print('  found target:    ' + target)
 
 config = config.replace(config[start:end], '\n'.join(target_block))
 

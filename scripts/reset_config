@@ -31,8 +31,10 @@ def clean_ros_ws(d, depth):
     if 'CMakeLists.txt' in files and 'package.xml' in files and 'CATKIN_IGNORE' not in files:
         # ROS package
         for f in files:
-            if 'CMakeLists.user' in f:
+            if 'CMakeLists.txt.user' in f:
                 os.remove(d + '/' + f)
+        if 'build' in files:
+            rmtree(d + '/build')
         # also configure
         os.system('python {} --yes -c {}'.format(gen_script,d))
         return False    
@@ -43,14 +45,14 @@ do_dir(os.path.expanduser('~'),register_ros_dir)
 # find minimum depth ROS folder
 ros_dir = min(ros_dirs, key = lambda x: x[0])[1]
 
+# reset CMakeLists for all ROS projects
+do_dir(ros_dir + '/src', clean_ros_ws)
+
 # erase config
 for sub_dir in ('build','devel','logs','install'):
     this_dir = ros_dir + '/' + sub_dir
     if os.path.exists(this_dir):
         rmtree(this_dir)
-
-# reset CMakeLists for all ROS projects
-do_dir(ros_dir + '/src', clean_ros_ws)
-
+        
 os.chdir(ros_dir)
 os.system('catkin build')
