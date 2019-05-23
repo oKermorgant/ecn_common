@@ -1,0 +1,56 @@
+#! /usr/bin/env python
+
+import sys
+import os
+from shutil import rmtree
+from time import localtime, sleep
+from subprocess import check_output
+import argparse
+
+ignore = ['build','install','devel']
+
+ros_dirs = []
+gen_script = os.path.dirname(__file__) + '/gen_qtcreator'
+
+def do_dir(d, fct, depth = 0):
+    for li in os.listdir(d):
+        d_new = d + '/' + li
+        if os.path.isdir(d_new) and li not in ignore and li[0] != '.':
+            if fct(d_new, depth):
+                do_dir(d_new, fct, depth+1)
+
+def register_ros_dir(d, depth = 0):
+    global ros_dirs
+    if '.catkin_tools' in os.listdir(d) and 'src' in os.listdir(d):
+        ros_dirs.append((depth, d))
+        return False
+    return True
+
+def clean_ros_ws(d, depth):
+    files = os.listdir(d)
+    if 'CMakeLists.txt' in files and 'package.xml' in files and 'CATKIN_IGNORE' not in files:
+        # ROS package
+        for f in files:
+            if 'CMakeLists.user' in f:
+                os.remove(d + '/' + f)
+        # also configure
+        os.system('python {} --yes -c {}'.format(gen_script,d))
+        return False    
+    return True
+       
+do_dir(os.path.expanduser('~'),register_ros_dir)
+
+# find minimum depth ROS folder
+ros_dir = min(ros_dirs, key = lambda x: x[0])[1]
+
+# erase config
+for sub_dir in ('build','devel','logs','install'):
+    this_dir = ros_dir + '/' + sub_dir
+    if os.path.exists(this_dir):
+        rmtree(this_dir)
+
+# reset CMakeLists for all ROS projects
+do_dir(ros_dir + '/src', clean_ros_ws)
+
+os.chdir(ros_dir)
+os.system('catkin build')
