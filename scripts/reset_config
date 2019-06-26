@@ -28,7 +28,11 @@ def register_ros_dir(d, depth = 0):
 
 def clean_ros_ws(d, depth):
     files = os.listdir(d)
-    if 'CMakeLists.txt' in files and 'package.xml' in files and 'CATKIN_IGNORE' not in files:
+    
+    if 'CATKIN_IGNORE' in files:
+        return False
+    
+    if 'CMakeLists.txt' in files and 'package.xml' in files:
         # ROS package
         for f in files:
             if 'CMakeLists.txt.user' in f:
