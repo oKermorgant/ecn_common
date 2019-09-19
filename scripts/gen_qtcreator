@@ -33,7 +33,10 @@ if args.r:
         if 'CMakeLists.txt' in os.listdir(d) and 'CMakeLists.txt.user' in os.listdir(d):
             print('Calling gen_qtcreator in ' + d)
             cmd = 'rosrun ecn_common gen_qtcreator --yes -c ' + d
-            check_output(cmd.split())
+            try:
+                check_output(cmd.split())
+            except:
+                pass
             return  
         
         for li in os.listdir(d):
