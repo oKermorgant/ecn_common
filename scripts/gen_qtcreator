@@ -21,7 +21,28 @@ parser.add_argument('-c', metavar='cmakelist_dir', help='Folder of CMakeLists.tx
 parser.add_argument('-b', metavar='build_dir', help='Relative build folder',default='./build')
 parser.add_argument('--clean', action='store_true', default=False)
 parser.add_argument('--yes', action='store_true', default=False)
+parser.add_argument('-r', action='store_true', default=False, help="Runs this script recursively from this folder")
 args = parser.parse_args()
+
+if args.r:
+    
+    ignore = ['build','install','devel']
+    
+    def do_dir(d):
+        
+        if 'CMakeLists.txt' in os.listdir(d) and 'CMakeLists.txt.user' in os.listdir(d):
+            print('Calling gen_qtcreator in ' + d)
+            cmd = 'rosrun ecn_common gen_qtcreator --yes -c ' + d
+            check_output(cmd.split())
+            return  
+        
+        for li in os.listdir(d):
+            d_new = d + '/' + li
+            if os.path.isdir(d_new) and li not in ignore and li[0] != '.':
+                do_dir(d_new)    
+                
+    do_dir('.')
+    sys.exit(0)
 
 if args.clean:
     args.yes = True
@@ -76,9 +97,14 @@ ros_package = False
 
 print('Loading ' + os.path.abspath(cmake_file))
 
+has_lib = False
 for line in cmake:
     if 'project(' in line:
         package = extract(line)
+    elif 'add_library(' in line:
+        start = line.find('add_library')
+        if '#' not in line[:start]:
+            has_lib = True
     elif 'add_executable(' in line:
         start = line.find('add_executable')
         if '#' not in line[:start]:
@@ -90,7 +116,7 @@ for line in cmake:
     elif 'catkin_package' in line:
         ros_package = True
         
-if len(targets) == 0:
+if len(targets) == 0 and not has_lib:
     print('  no C++ targets for ' + package)
     sys.exit(0)
         
@@ -120,10 +146,12 @@ print('  bin directory:   ' + os.path.abspath(bin_dir))
 ecn_common_path = os.path.dirname(os.path.abspath(__file__))
 
 template_name = 'CMakeLists.txt.user.template.pre4.8'
-if qtcVersion.startswith('4.9'):
-    template_name = 'CMakeLists.txt.user.template'
-elif qtcVersion.startswith('4.8'):
+if qtcVersion.startswith('4.8'):
     template_name = 'CMakeLists.txt.user.template.4.8'
+elif qtcVersion.startswith('4.9'):
+    template_name = 'CMakeLists.txt.user.template.4.9'
+elif qtcVersion.startswith('4.10'):
+    template_name = 'CMakeLists.txt.user.template'
     
 template_file = ecn_common_path + '/' + template_name
 
