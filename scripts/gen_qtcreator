@@ -32,7 +32,7 @@ if args.r:
         
         if 'CMakeLists.txt' in os.listdir(d) and 'CMakeLists.txt.user' in os.listdir(d):
             print('Calling gen_qtcreator in ' + d)
-            cmd = 'rosrun ecn_common gen_qtcreator --yes -c ' + d
+            cmd = 'rosrun ecn_common gen_qtcreator --clean -c ' + d
             try:
                 check_output(cmd.split())
             except:
@@ -71,13 +71,36 @@ if not os.path.exists(envID_file) or not os.path.exists(confID_file):
     #print('Please run QtCreator at least once before automatic configuration')
     #sys.exit(0)
     
+class Version:
+    def __init__(self, s):
+        self.s = self.split(s)
+        
+    def split(self,s):
+        s = [int(v) for v in s.split('.')]
+        if len(s) != 3:
+            s += [0]*(3-len(s))
+        return s
+    def rep(self):
+        return '.'.join(str(v) for v in self.s)
+    
+    def __eq__(self,s):
+        s = self.split(s)
+        return s[0] == self.s[0] and s[1] == self.s[1]
+    
+    def __ge__(self, s):
+        s = self.split(s)
+        for i in range(3):
+            if self.s[i] < s[i]:
+                return False
+        return True
+        
 # get ID's on this computer and Qt Creator version
 with open(envID_file) as f:
     envID = f.read().split('Settings\EnvironmentId=@ByteArray(')[1].split(')')[0]
 with open(confID_file) as f:
     data = f.read()
     confID = data.split('<value type="QString" key="PE.Profile.Id">')[1].split('<')[0]
-    qtcVersion = data.split('<!-- Written by QtCreator ')[1].split(', ')[0]
+    qtcVersion = Version(data.split('<!-- Written by QtCreator ')[1].split(', ')[0])
 
 if not os.path.exists(cmake_file):
     print('Could not find CMakeLists.txt, exiting')
@@ -91,6 +114,12 @@ if os.path.exists(cmake_user) and not args.yes:
     if ans == 'n':
         print('CMakeLists.txt.user already exists, exiting')
         sys.exit(0)
+        
+# remove previous configs
+for li in os.listdir(cmake_dir):
+    if li.startswith('CMakeLists.txt.user'):
+        print('Removing ' + cmake_dir + '/' + li)
+        os.remove(cmake_dir + '/' + li)
         
 cmake = file(cmake_file).read().splitlines()
 package = ''
@@ -145,15 +174,16 @@ elif args.clean:
 print('  build directory: ' + os.path.abspath(build_dir))
 print('  bin directory:   ' + os.path.abspath(bin_dir))
 
+
 # load configuration template
 ecn_common_path = os.path.dirname(os.path.abspath(__file__))
 
 template_name = 'CMakeLists.txt.user.template.pre4.8'
-if qtcVersion.startswith('4.8'):
+if qtcVersion == '4.8':
     template_name = 'CMakeLists.txt.user.template.4.8'
-elif qtcVersion.startswith('4.9'):
+elif qtcVersion == '4.9':
     template_name = 'CMakeLists.txt.user.template.4.9'
-elif qtcVersion.startswith('4.10'):
+elif qtcVersion >= '4.10':
     template_name = 'CMakeLists.txt.user.template'
     
 template_file = ecn_common_path + '/' + template_name
@@ -171,7 +201,7 @@ for key in ('year', 'mon', 'mday','hour','min','sec'):
 time_str = '{}-{}-{}T{}:{}:{}'.format(*ct_str)
 
 replace_dict = {}
-replace_dict['<gen_version/>'] =  qtcVersion
+replace_dict['<gen_version/>'] = qtcVersion.rep()
 replace_dict['<gen_time/>'] =  '{}-{}-{}T{}:{}:{}'.format(*ct_str)
 replace_dict['<gen_envID/>'] = envID
 replace_dict['<gen_cmake_dir/>'] = cmake_dir
