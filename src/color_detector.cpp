@@ -58,8 +58,6 @@ void ColorDetector::showSegmentation()
 
 
 
-
-
 std::vector<cv::Point> ColorDetector::findMainContour(const cv::Mat &_im)
 {
     cv::cvtColor(_im, img_, cv::COLOR_BGR2HSV);

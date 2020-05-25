@@ -1,15 +1,14 @@
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
 #include <stdio.h>
 #include <sensor_msgs/Image.h>
 #include <image_transport/subscriber.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/Image.h>
 
-using namespace std;
 using namespace cv;
-
 cv::Mat src;
 bool im_ok;
 
@@ -36,7 +35,7 @@ int main( int argc, char** argv )
     // build inRange bounds for hue
     vector<int> hue = {0,10, 170,179};
 
-    Mat dst, mask, mask2;
+    cv::Mat dst, mask, mask2;
 
     ros::Rate loop(10);
 
@@ -44,7 +43,7 @@ int main( int argc, char** argv )
     {
         if(im_ok)
         {
-            cvtColor(src, src, cv::COLOR_BGR2HSV);
+            cv::cvtColor(src, src, cv::COLOR_BGR2HSV);
             // segment for detection of given RGB (from Hue)
             cv::inRange(src, cv::Scalar(hue[0], 0,0),
                     cv::Scalar(hue[1], 255, 255), mask);
@@ -95,7 +94,7 @@ int main( int argc, char** argv )
             }
 
             /// Display
-            namedWindow("calcHist Demo", CV_WINDOW_AUTOSIZE );
+            namedWindow("calcHist Demo", cv::CV_WINDOW_AUTOSIZE );
             imshow("calcHist Demo", histImage );
 
             waitKey(1);

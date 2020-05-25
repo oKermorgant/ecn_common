@@ -104,7 +104,7 @@ with open(confID_file) as f:
 
 if not os.path.exists(cmake_file):
     print('Could not find CMakeLists.txt, exiting')
-    print('Given location: ', cmake_file)
+    print('Given location: ' + cmake_file)
     sys.exit(0)
 
 if os.path.exists(cmake_user) and not args.yes:
@@ -150,7 +150,7 @@ for line in cmake:
         
 if len(targets) == 0 and not has_lib:
     print('  no C++ targets for ' + package)
-    sys.exit(0)
+
         
 # check build directory - update if ROS unless manually set
 bin_dir = build_dir

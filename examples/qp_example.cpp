@@ -11,7 +11,7 @@ void summary(std::string legend,
 {
     cout << legend << "\n";
     cout << "    Minimum at " << x.t() << '\n';
-    cout << "    Objective: " << (Q*x - r).euclideanNorm() << '\n';
+    cout << "    Objective: " << (Q*x - r).frobeniusNorm() << '\n';
     cout << "    Equalities (should be = 0 if considered): " << (A*x-b).t() << '\n';
     cout << "    Inequalities (should be <= 0 if considered): " << (C*x-d).t() << '\n' << '\n';
 }
@@ -62,7 +62,7 @@ int main()
     vpQuadProg qp;
 
     // without constraints: no need for a solver
-    x = Q.pseudoInverse() * r;
+    x = Q.solveByQR(r);
     summary("No constraints", Q, r, A, b, C, d, x);
 
 

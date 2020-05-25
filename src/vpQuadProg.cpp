@@ -192,12 +192,12 @@ bool vpQuadProg::solveByProjection(const vpMatrix &Q, const vpColVector &r,
       return false;
 
     if(A.getCols() && (Q*A).infinityNorm() > tol)
-      x = b + A*(Q*A).solveBySVD(r - Q*b);
+      x = b + A*solveSVDorQR(Q*A ,r - Q*b);
     else
       x = b;
   }
   else
-    x = Q.solveBySVD(r);
+    x = solveSVDorQR(Q, r);
   return true;
 }
 
@@ -268,12 +268,12 @@ bool vpQuadProg::solveQPe (const vpMatrix &Q, const vpColVector &r,
   if(Z.getCols())
   {
     if((Q*Z).infinityNorm() > tol)
-      x = x1 + Z*(Q*Z).solveBySVD(r - Q*x1);
+      x = x1 + Z*solveSVDorQR(Q*Z, r - Q*x1);
     else
       x = x1;
   }
   else
-    x = Q.solveBySVD(r);
+    x = solveSVDorQR(Q, r);
   return true;
 }
 
@@ -325,7 +325,7 @@ bool vpQuadProg::solveQPe (const vpMatrix &Q, const vpColVector &r,
 bool vpQuadProg::solveQPe (const vpMatrix &Q, const vpColVector &r, vpMatrix A, vpColVector b,
                            vpColVector &x, const double &tol)
 {
-  checkDimensions(Q, r, &A, &b, NULL, NULL, "solveQPe");
+  checkDimensions(Q, r, &A, &b, nullptr, nullptr, "solveQPe");
 
   if(!solveByProjection(Q, r, A, b, x, tol))
   {
@@ -467,7 +467,7 @@ bool vpQuadProg::solveQPi(const vpMatrix &Q, const vpColVector &r,
                           vpColVector &x, const bool use_equality,
                           const double &tol)
 {
-  const unsigned int n = checkDimensions(Q, r, NULL, NULL, &C, &d, "solveQPi");
+  const unsigned int n = checkDimensions(Q, r, nullptr, nullptr, &C, &d, "solveQPi");
 
   if(use_equality)
   {
@@ -518,8 +518,8 @@ bool vpQuadProg::solveQPi(const vpMatrix &Q, const vpColVector &r,
   }
 
   // warm start from previous active set
-  A.resize(active.size(), n);
-  b.resize(active.size());
+  A.resize(static_cast<uint>(active.size()), n);
+  b.resize(static_cast<uint>(active.size()));
   for(unsigned int i = 0; i < active.size(); ++i)
   {
     for(unsigned int j = 0; j < n; ++j)
@@ -622,8 +622,8 @@ bool vpQuadProg::solveQPi(const vpMatrix &Q, const vpColVector &r,
   // solve at one iteration
   while (true)
   {
-    A.resize(active.size(), n);
-    b.resize(active.size());
+    A.resize(static_cast<uint>(active.size()), n);
+    b.resize(static_cast<uint>(active.size()));
     for(unsigned int i = 0; i < active.size(); ++i)
     {
       for(unsigned int j = 0; j < n; ++j)
@@ -643,7 +643,7 @@ bool vpQuadProg::solveQPi(const vpMatrix &Q, const vpColVector &r,
     if(vpLinProg::allZero(u, tol))
     {
       // compute multipliers if any
-      unsigned int ineqInd = active.size();
+      unsigned int ineqInd = static_cast<uint>(active.size());
       if(active.size())
       {
         mu = -Ap.transpose() * Q.transpose() * (Q*u - g);
@@ -711,6 +711,25 @@ bool vpQuadProg::solveQPi(const vpMatrix &Q, const vpColVector &r,
     }
   }
 }
+
+/*!
+  Pick either SVD (over-constrained) or QR (square or under-constrained)
+
+  Assumes A is full rank, hence uses SVD iif A has more row than columns.
+
+  \param A : matrix (dimension m x n)
+  \param b : vector (dimension m)
+
+  \return least-norm solution to \f$\arg\min||\mathbf{A}\mathbf{x} - \mathbf{b}||\f$
+*/
+vpColVector vpQuadProg::solveSVDorQR(const vpMatrix &A, const vpColVector &b)
+{
+  // assume A is full rank
+  if(A.getRows() > A.getCols())
+    return A.solveBySVD(b);
+  return ecn::solveByQR(A, b);
+}
+
 #else
 void dummy_vpQuadProg(){};
 #endif

@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(ecn_common)
 
-## Compile as C++11, supported in ROS Kinetic and newer
-set(CMAKE_CXX_STANDARD 11)
-
 set(CMAKE_BUILD_TYPE Release)
 
 ## Find catkin macros and libraries
@@ -20,8 +17,10 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(VISP REQUIRED)
-find_package(OpenCV 3 REQUIRED)
+find_package(OpenCV REQUIRED)
 
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Python libs
 catkin_python_setup()
 
@@ -38,7 +37,7 @@ catkin_package(
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS rospy cv_bridge roscpp image_transport std_msgs
                     sensor_msgs geometry_msgs
-  DEPENDS ${VISP_LIBRARIES} ${OpenCV_LIBS}
+  DEPENDS ${VISP_LIBRARIES} ${OpenCV_LIBS} 
 )
 
 ## Specify additional locations of header files
@@ -76,8 +75,8 @@ target_link_libraries(color_example ${PROJECT_NAME})
 add_executable(qp_example examples/qp_example.cpp)
 target_link_libraries(qp_example ${PROJECT_NAME})
 
-add_executable(hist examples/test_hist.cpp)
-target_link_libraries(hist ${PROJECT_NAME})
+#add_executable(hist examples/test_hist.cpp)
+#target_link_libraries(hist ${PROJECT_NAME})
 
 
 #############

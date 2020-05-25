@@ -267,6 +267,19 @@ bool vpLinProg::rowReduction(vpMatrix &A, vpColVector &b, const double &tol)
   const unsigned int m = A.getRows();
   const unsigned int n = A.getCols();
 
+  // degeneracy if A is actually null
+  if(A.infinityNorm() < tol)
+  {
+    if(b.infinityNorm() < tol)
+    {
+      b.resize(0);
+      A.resize(0,n);
+      return true;
+    }
+    else
+      return false;
+  }
+
   vpMatrix Q, R, P;
   const unsigned int r = ecn::QRPivot(A, Q, R, P, false, false, tol);
   const vpColVector x = P.transpose() *
@@ -750,6 +763,7 @@ bool vpLinProg::simplex(const vpColVector &c, vpMatrix A, vpColVector b, vpColVe
       if(db[k] < -tol)
         a.push_back({-x[B[k]]/db[k], k});
     }
+
     // get smallest index for smallest alpha
     const auto amin = std::min_element(a.begin(), a.end());
     const double alpha = amin->first;
