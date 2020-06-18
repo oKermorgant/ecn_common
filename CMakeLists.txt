@@ -83,7 +83,7 @@ target_link_libraries(qp_example ${PROJECT_NAME})
 ## Install ##
 #############
 
-catkin_install_python(PROGRAMS scripts/token_manager examples/token_python_example scripts/gen_qtcreator
+catkin_install_python(PROGRAMS scripts/token_manager examples/token_python_example
                       DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
  # only install actual library
