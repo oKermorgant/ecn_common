@@ -4,7 +4,6 @@ import sys
 import os
 from shutil import rmtree
 from time import localtime, sleep
-from subprocess import check_output
 import argparse
 
 ignore = ['build','install','devel']
