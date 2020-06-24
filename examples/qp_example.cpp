@@ -1,4 +1,4 @@
-#include<ecn_common/vpQuadProg.h>
+#include<visp/vpQuadProg.h>
 
 using std::cout;
 using std::endl;

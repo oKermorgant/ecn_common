@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   urdf
 )
 
-find_package(VISP REQUIRED)
+find_package(VISP REQUIRED COMPONENTS core)
 find_package(OpenCV REQUIRED)
 
 set(CMAKE_CXX_STANDARD 14)
@@ -54,12 +54,6 @@ add_library(${PROJECT_NAME}
                 include/ecn_common/visp_utils.h
                 include/ecn_common/color_detector.h
                 src/color_detector.cpp
-                include/ecn_common/qr.h
-                src/qr.cpp
-                include/ecn_common/vpLinProg.h
-                src/vpLinProg.cpp
-                include/ecn_common/vpQuadProg.h
-                src/vpQuadProg.cpp
                 include
                 )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${VISP_LIBRARIES})
